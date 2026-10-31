@@ -1,0 +1,296 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="dark">
+    <title>聆序 · 主持台</title>
+    <meta
+      name="description"
+      content="聆序本地主持人控制台：会议状态、议程、发言、计时、投票与场景模拟。"
+    >
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/app.js" defer></script>
+  </head>
+  <body>
+    <div class="ambient ambient-one" aria-hidden="true"></div>
+    <div class="ambient ambient-two" aria-hidden="true"></div>
+
+    <section class="login-shell" id="login-shell" aria-labelledby="login-title">
+      <div class="login-mark" aria-hidden="true">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <p class="eyebrow">LOCAL HOST CONSOLE</p>
+      <h1 id="login-title">让会议沿着清晰的节奏前进。</h1>
+      <p class="login-copy">
+        这是仅在本机开放的聆序主持台。输入控制台令牌，连接当前 GRS Studio 会议。
+      </p>
+      <form id="login-form" class="login-form">
+        <label for="login-token">控制台令牌</label>
+        <div class="token-row">
+          <input
+            id="login-token"
+            name="token"
+            type="password"
+            autocomplete="current-password"
+            required
+            maxlength="4096"
+            placeholder="粘贴本地令牌"
+          >
+          <button type="submit" class="primary-button">进入主持台</button>
+        </div>
+        <p class="form-hint">令牌只用于换取本机 HttpOnly 会话，不写入浏览器存储。</p>
+        <p class="form-error" id="login-error" role="alert"></p>
+      </form>
+      <div class="login-foot">
+        <span><i class="status-dot"></i> Localhost only</span>
+        <span>Lingxu / Phase 13</span>
+      </div>
+    </section>
+
+    <div class="app-shell is-hidden" id="app-shell">
+      <aside class="rail">
+        <a class="brand" href="#overview" aria-label="聆序主持台首页">
+          <span class="brand-glyph" aria-hidden="true">
+            <i></i><i></i><i></i><i></i>
+          </span>
+          <span>
+            <strong>聆序</strong>
+            <small>LINGXU</small>
+          </span>
+        </a>
+
+        <nav class="rail-nav" aria-label="控制台导航">
+          <a class="active" href="#overview"><span>01</span> 现场</a>
+          <a href="#people"><span>02</span> 参与者</a>
+          <a href="#speech"><span>03</span> 发言</a>
+          <a href="#scenario"><span>04</span> 场景</a>
+          <a href="#events"><span>05</span> 事件</a>
+        </nav>
+
+        <div class="rail-footer">
+          <p>授权 Guild</p>
+          <code id="guild-id">—</code>
+          <button class="text-button" id="logout-button" type="button">安全退出</button>
+        </div>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <div>
+            <p class="eyebrow">MEETING OPERATIONS</p>
+            <h1>主持台</h1>
+          </div>
+          <div class="connection-pill" id="connection-pill">
+            <i></i>
+            <span id="connection-label">正在连接</span>
+          </div>
+        </header>
+
+        <section class="hero-grid" id="overview">
+          <article class="state-panel">
+            <div class="panel-label">
+              <span>当前阶段</span>
+              <code id="session-id">NO ACTIVE SESSION</code>
+            </div>
+            <div class="state-display">
+              <div>
+                <p class="state-kicker" id="state-kicker">会议状态</p>
+                <h2 id="meeting-state">IDLE</h2>
+              </div>
+              <span class="sequence-badge">EVT <strong id="event-sequence">0</strong></span>
+            </div>
+            <div class="current-agenda">
+              <span class="agenda-index" id="current-agenda-index">—</span>
+              <div>
+                <p>当前议题</p>
+                <h3 id="current-agenda-title">等待创建会议</h3>
+              </div>
+            </div>
+            <div class="control-row" aria-label="会议控制">
+              <button type="button" data-control="pause">暂停</button>
+              <button type="button" data-control="resume">继续</button>
+              <button type="button" data-control="back">上一步</button>
+              <button type="button" data-control="next">下一步</button>
+              <button type="button" data-control="skip">跳过</button>
+              <button type="button" data-control="stop" class="danger">结束会议</button>
+            </div>
+          </article>
+
+          <article class="timer-panel">
+            <div class="panel-label">
+              <span>主计时器</span>
+              <span class="live-tag">LIVE</span>
+            </div>
+            <div class="timer-face">
+              <span id="timer-value">--:--</span>
+              <small id="timer-type">NO TIMER</small>
+            </div>
+            <div class="timer-track"><i id="timer-progress"></i></div>
+            <p id="timer-status">等待会议计时器</p>
+          </article>
+        </section>
+
+        <section class="agenda-strip" aria-label="议程进度">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">AGENDA</p>
+              <h2>议程脉络</h2>
+            </div>
+            <span id="agenda-count">0 个议题</span>
+          </div>
+          <div class="agenda-list" id="agenda-list">
+            <p class="empty-state">暂无议程</p>
+          </div>
+        </section>
+
+        <section class="content-grid" id="people">
+          <article class="card people-card">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">PEOPLE & CONSENT</p>
+                <h2>参与者</h2>
+              </div>
+              <span id="participant-count">0 在线</span>
+            </div>
+            <div class="consent-legend" aria-label="同意状态图例">
+              <span><i class="consent asr"></i> 实时识别</span>
+              <span><i class="consent recording"></i> 录音</span>
+              <span><i class="consent minutes"></i> 纪要</span>
+            </div>
+            <div class="people-list" id="people-list">
+              <p class="empty-state">暂无参与者</p>
+            </div>
+          </article>
+
+          <article class="card speaker-card" id="speech">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">SPEAKING ORDER</p>
+                <h2>发言队列</h2>
+              </div>
+              <span id="queue-count">0 等待</span>
+            </div>
+            <div class="current-speaker">
+              <span class="speaker-orbit" aria-hidden="true"><i></i></span>
+              <div>
+                <p>正在发言</p>
+                <h3 id="current-speaker">暂无</h3>
+              </div>
+            </div>
+            <ol class="queue-list" id="queue-list">
+              <li class="empty-state">队列为空</li>
+            </ol>
+          </article>
+
+          <article class="card vote-card">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">VOTE</p>
+                <h2>投票</h2>
+              </div>
+              <span id="vote-mode">未开启</span>
+            </div>
+            <h3 id="vote-title">当前没有进行中的投票</h3>
+            <div class="vote-options" id="vote-options">
+              <p class="empty-state">结果将在这里以汇总形式显示</p>
+            </div>
+            <p class="privacy-note">匿名投票只显示计数，不传输投票者身份。</p>
+          </article>
+        </section>
+
+        <section class="content-grid lower-grid">
+          <article class="card utterance-card">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">FINAL UTTERANCE</p>
+                <h2>最终识别</h2>
+              </div>
+              <span>已同意内容</span>
+            </div>
+            <div class="utterance-list" id="utterance-list">
+              <p class="empty-state">尚无最终识别结果</p>
+            </div>
+          </article>
+
+          <article class="card tts-card">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">HOST VOICE</p>
+                <h2>手工播报</h2>
+              </div>
+              <span>本地 TTS</span>
+            </div>
+            <form id="tts-form">
+              <label for="tts-text">播报内容</label>
+              <textarea
+                id="tts-text"
+                maxlength="300"
+                required
+                placeholder="输入需要聆序播报的主持提示……"
+              ></textarea>
+              <div class="form-actions">
+                <span id="tts-count">0 / 300</span>
+                <button class="primary-button" type="submit">立即播报</button>
+              </div>
+              <p class="form-result" id="tts-result" role="status"></p>
+            </form>
+          </article>
+        </section>
+
+        <section class="scenario-grid" id="scenario">
+          <article class="scenario-card">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">PUBLISHED SCENARIO</p>
+                <h2>场景版本</h2>
+              </div>
+              <span id="scenario-status">—</span>
+            </div>
+            <div id="scenario-summary" class="scenario-summary">
+              <p class="empty-state">没有已发布场景</p>
+            </div>
+          </article>
+
+          <article class="simulator-card">
+            <div class="section-heading compact">
+              <div>
+                <p class="eyebrow">SAFE SANDBOX</p>
+                <h2>模拟器</h2>
+              </div>
+              <button class="ghost-button" id="sim-reset" type="button">重置模拟</button>
+            </div>
+            <div class="sim-state">
+              <span>模拟状态</span>
+              <strong id="sim-state">未启动</strong>
+              <small id="sim-sequence">SEQ 0</small>
+            </div>
+            <div class="sim-actions" id="sim-actions">
+              <p class="empty-state">重置后显示当前可用事件</p>
+            </div>
+          </article>
+        </section>
+
+        <section class="events-card" id="events">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">APPEND-ONLY EVENT STREAM</p>
+              <h2>最近事件</h2>
+            </div>
+            <span>内容最小化投影</span>
+          </div>
+          <div class="event-list" id="event-list">
+            <p class="empty-state">暂无事件</p>
+          </div>
+        </section>
+
+        <footer>
+          <span>聆序 Lingxu · Local Operations Surface</span>
+          <span id="last-updated">等待数据</span>
+        </footer>
+      </main>
+    </div>
+
+    <div class="toast-region" id="toast-region" aria-live="polite"></div>
+  </body>
+</html>

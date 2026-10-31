@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "license": "Apache-2.0",
+  "history_strategy": "new_repository_existing_archive_stays_private",
+  "copyright_holder": "Xav13RRR",
+  "code_rights": "owner_confirmed",
+  "code_rights_exceptions": [],
+  "banner": "owner_confirmed",
+  "banner_license": "Apache-2.0",
+  "public_repository_name": "LINGXU-V2",
+  "public_repository_url": "https://github.com/Xav13RRR/LINGXU-V2",
+  "publication_authorized": true,
+  "authorization_scope": "delete_and_recreate_only_LINGXU-V2_after_complete_privacy_review",
+  "production_deployment_authorized": false
+}

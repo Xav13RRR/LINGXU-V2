@@ -1,0 +1,40 @@
+services:
+  lingxu-full-transcript-preview:
+    build:
+      context: .
+      target: tools
+    profiles:
+      - golden
+    init: true
+    restart: "no"
+    read_only: true
+    environment:
+      SUMMARY_LLM_ENABLED: "true"
+      SUMMARY_LLM_BASE_URL: https://api.deepseek.com
+      SUMMARY_LLM_API_KEY: ${SUMMARY_LLM_API_KEY:-}
+      SUMMARY_LLM_MODEL: deepseek-flash
+      SUMMARY_LLM_MODEL_DIGEST: 4a87243abc84b3147f3e9c2fc3416e539ae1ebd634706612996fc62018d32a0f
+      SUMMARY_LLM_TIMEOUT_SECONDS: "1200"
+      SUMMARY_LLM_ALLOW_REMOTE: "true"
+    entrypoint:
+      - python
+      - /app/scripts/preview_full_transcript_minutes.py
+    command:
+      - --transcript
+      - /app/tests/private_fixtures/0818/meeting/transcript.json
+      - --template
+      - /app/src/lingxu/resources/deepseek_full_transcript_minutes.md
+      - --output-dir
+      - /app/tests/private_fixtures/0818/meeting/task13-full-transcript-preview
+    volumes:
+      - type: bind
+        source: ./tests/private_fixtures/0818/meeting
+        target: /app/tests/private_fixtures/0818/meeting
+    tmpfs:
+      - /tmp:uid=10001,gid=10001,mode=0700,size=64m
+    networks:
+      - default
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL

@@ -1,0 +1,410 @@
+name: lingxu
+
+x-lingxu-app-build: &lingxu-app-build
+  context: .
+  target: runtime
+  args:
+    BUILD_VERSION: ${LINGXU_BUILD_VERSION:-0.1.0}
+    BUILD_REVISION: ${LINGXU_BUILD_REVISION:-unknown}
+    BUILD_SOURCE: ${LINGXU_BUILD_SOURCE:-https://github.com/Xav13RRR/LINGXU-V2}
+
+x-lingxu-tts-build: &lingxu-tts-build
+  context: .
+  dockerfile: Dockerfile.cosyvoice
+  args:
+    COSYVOICE_REPO_SHA: 074ca6dc9e80a2f424f1f74b48bdd7d3fea531cc
+    TTS_BUILD_FINGERPRINT: ${LINGXU_TTS_BUILD_FINGERPRINT:-unknown}
+
+x-lingxu-common: &lingxu-common
+  image: ${LINGXU_APP_IMAGE:-lingxu-app}:${LINGXU_APP_IMAGE_TAG:-latest}
+  restart: unless-stopped
+  init: true
+  environment: &lingxu-bot-environment
+    DISCORD_APPLICATION_ID: ${DISCORD_APPLICATION_ID:-}
+    DISCORD_TEST_GUILD_ID: ${DISCORD_TEST_GUILD_ID:-}
+    DATABASE_URL: sqlite+aiosqlite:////data/lingxu.db
+    DATA_ROOT: /data/sessions
+    GLOSSARY_ROOT: /data/glossaries
+    RUNTIME_TMP: /runtime
+    MODEL_CACHE_DIR: /models
+    MODELSCOPE_CACHE: /models/modelscope
+    LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    VOICE_DUPLEX_DAVE_READY_TIMEOUT_SECONDS: ${VOICE_DUPLEX_DAVE_READY_TIMEOUT_SECONDS:-15}
+    WORKER_POLL_INTERVAL_SECONDS: ${WORKER_POLL_INTERVAL_SECONDS:-2}
+    WORKER_JOB_LOCK_SECONDS: ${WORKER_JOB_LOCK_SECONDS:-600}
+    WORKER_JOB_MAX_ATTEMPTS: ${WORKER_JOB_MAX_ATTEMPTS:-3}
+    REQUIRE_REALTIME_ASR_CONSENT: ${REQUIRE_REALTIME_ASR_CONSENT:-true}
+    REALTIME_ASR_PROVIDER: ${REALTIME_ASR_PROVIDER:-sensevoice}
+    REALTIME_ASR_MODEL: ${REALTIME_ASR_MODEL:-iic/SenseVoiceSmall}
+    REALTIME_ASR_MODEL_REVISION: ${REALTIME_ASR_MODEL_REVISION:-master}
+    REALTIME_ASR_MODEL_SHA256: ${REALTIME_ASR_MODEL_SHA256:-833ca2dcfdf8ec91bd4f31cfac36d6124e0c459074d5e909aec9cabe6204a3ea}
+    REALTIME_ASR_VAD_MODEL: ${REALTIME_ASR_VAD_MODEL:-fsmn-vad}
+    REALTIME_ASR_VAD_MODEL_REVISION: ${REALTIME_ASR_VAD_MODEL_REVISION:-v2.0.4}
+    REALTIME_ASR_VAD_MODEL_SHA256: ${REALTIME_ASR_VAD_MODEL_SHA256:-b3be75be477f0780277f3bae0fe489f48718f585f3a6e45d7dd1fbb1a4255fc5}
+    REALTIME_ASR_LANGUAGE_MODE: ${REALTIME_ASR_LANGUAGE_MODE:-auto}
+    REALTIME_ASR_HOTWORDS: ${REALTIME_ASR_HOTWORDS:-}
+    REALTIME_ASR_TIMEOUT_SECONDS: ${REALTIME_ASR_TIMEOUT_SECONDS:-8}
+    REALTIME_ASR_MAX_CONCURRENCY: ${REALTIME_ASR_MAX_CONCURRENCY:-1}
+    REALTIME_ASR_QUEUE_MAX_FRAMES_PER_USER: ${REALTIME_ASR_QUEUE_MAX_FRAMES_PER_USER:-500}
+    REALTIME_ASR_QUEUE_MAX_UTTERANCES: ${REALTIME_ASR_QUEUE_MAX_UTTERANCES:-32}
+    REALTIME_ASR_VAD_THRESHOLD: ${REALTIME_ASR_VAD_THRESHOLD:-500}
+    REALTIME_ASR_VAD_START_MS: ${REALTIME_ASR_VAD_START_MS:-60}
+    REALTIME_ASR_VAD_END_MS: ${REALTIME_ASR_VAD_END_MS:-800}
+    REALTIME_ASR_MIN_UTTERANCE_MS: ${REALTIME_ASR_MIN_UTTERANCE_MS:-300}
+    REALTIME_ASR_MAX_UTTERANCE_SECONDS: ${REALTIME_ASR_MAX_UTTERANCE_SECONDS:-30}
+    MEETING_ASSISTANT_ENABLED: ${MEETING_ASSISTANT_ENABLED:-true}
+    MEETING_ASSISTANT_WAKE_PHRASE: ${MEETING_ASSISTANT_WAKE_PHRASE:-呼叫指挥中心}
+    MEETING_ASSISTANT_WAKEWORD_MODEL_DIR: /models/sherpa-onnx-kws-zipformer-zh-en-3M-2025-12-20
+    MEETING_ASSISTANT_WAKEWORD_MODEL_DIGEST: ${MEETING_ASSISTANT_WAKEWORD_MODEL_DIGEST:-9604d8412a76c099ef8eecedb95fa04d523cb16df2f6a6be724bc956a92870ef}
+    MEETING_ASSISTANT_WAKEWORD_SCORE: ${MEETING_ASSISTANT_WAKEWORD_SCORE:-1.5}
+    MEETING_ASSISTANT_WAKEWORD_THRESHOLD: ${MEETING_ASSISTANT_WAKEWORD_THRESHOLD:-0.18}
+    MEETING_ASSISTANT_QUEUE_MAX_FRAMES_PER_USER: ${MEETING_ASSISTANT_QUEUE_MAX_FRAMES_PER_USER:-500}
+    MEETING_ASSISTANT_QUEUE_MAX_UTTERANCES: ${MEETING_ASSISTANT_QUEUE_MAX_UTTERANCES:-64}
+    MEETING_ASSISTANT_KWS_WINDOW_MS: ${MEETING_ASSISTANT_KWS_WINDOW_MS:-4000}
+    MEETING_ASSISTANT_KWS_HOP_MS: ${MEETING_ASSISTANT_KWS_HOP_MS:-500}
+    MEETING_ASSISTANT_KWS_MIN_WINDOW_MS: ${MEETING_ASSISTANT_KWS_MIN_WINDOW_MS:-1200}
+    MEETING_ASSISTANT_KWS_PREROLL_MS: ${MEETING_ASSISTANT_KWS_PREROLL_MS:-300}
+    MEETING_ASSISTANT_VAD_THRESHOLD: ${MEETING_ASSISTANT_VAD_THRESHOLD:-500}
+    MEETING_ASSISTANT_VAD_START_MS: ${MEETING_ASSISTANT_VAD_START_MS:-60}
+    MEETING_ASSISTANT_VAD_END_MS: ${MEETING_ASSISTANT_VAD_END_MS:-800}
+    MEETING_ASSISTANT_MIN_UTTERANCE_MS: ${MEETING_ASSISTANT_MIN_UTTERANCE_MS:-300}
+    MEETING_ASSISTANT_MAX_UTTERANCE_SECONDS: ${MEETING_ASSISTANT_MAX_UTTERANCE_SECONDS:-30}
+    MEETING_ASSISTANT_FOLLOWUP_SECONDS: ${MEETING_ASSISTANT_FOLLOWUP_SECONDS:-4}
+    MEETING_ASSISTANT_QUARANTINE_MS: ${MEETING_ASSISTANT_QUARANTINE_MS:-600}
+    MEETING_ASSISTANT_ASR_TIMEOUT_SECONDS: ${MEETING_ASSISTANT_ASR_TIMEOUT_SECONDS:-8}
+    MEETING_ASSISTANT_LLM_BASE_URL: ${MEETING_ASSISTANT_LLM_BASE_URL:-http://lingxu-ollama:11434/v1}
+    MEETING_ASSISTANT_LLM_MODEL: ${MEETING_ASSISTANT_LLM_MODEL:-qwen3.5:9b}
+    MEETING_ASSISTANT_LLM_MODEL_DIGEST: ${MEETING_ASSISTANT_LLM_MODEL_DIGEST:-6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7}
+    MEETING_ASSISTANT_LLM_TIMEOUT_SECONDS: ${MEETING_ASSISTANT_LLM_TIMEOUT_SECONDS:-30}
+    MEETING_ASSISTANT_LLM_MAX_OUTPUT_TOKENS: ${MEETING_ASSISTANT_LLM_MAX_OUTPUT_TOKENS:-64}
+    MEETING_ASSISTANT_MAX_QUESTION_CHARS: ${MEETING_ASSISTANT_MAX_QUESTION_CHARS:-500}
+    MEETING_ASSISTANT_LLM_ALLOW_REMOTE: ${MEETING_ASSISTANT_LLM_ALLOW_REMOTE:-false}
+    RESIDENT_ASSISTANT_ENABLED: ${RESIDENT_ASSISTANT_ENABLED:-true}
+    RESIDENT_ASSISTANT_RECOVER_ON_RESTART: ${RESIDENT_ASSISTANT_RECOVER_ON_RESTART:-true}
+    RESIDENT_ASSISTANT_MAX_SESSIONS: ${RESIDENT_ASSISTANT_MAX_SESSIONS:-1}
+    TTS_PROVIDER: ${TTS_PROVIDER:-cosyvoice-sft}
+    TTS_BINARY: ${TTS_BINARY:-espeak-ng}
+    TTS_BASE_URL: ${TTS_BASE_URL:-http://lingxu-tts:50000}
+    TTS_MODEL: ${TTS_MODEL:-FunAudioLLM/CosyVoice-300M-SFT}
+    TTS_MODEL_REVISION: ${TTS_MODEL_REVISION:-fbb71de2afe387ed854eebd80b9f3d078c6b9869}
+    TTS_MODEL_DIGEST: ${TTS_MODEL_DIGEST:-3a80af814cfd832dadbf1fe677adf08e30f64b8bdcd52b997184515fb33d2198}
+    TTS_VOICE: ${TTS_VOICE:-中文女}
+    TTS_SPEED: ${TTS_SPEED:-1.0}
+    TTS_TIMEOUT_SECONDS: ${TTS_TIMEOUT_SECONDS:-60}
+    TTS_CACHE_DIR: /data/tts_cache
+    TTS_PLAYBACK_VOLUME: ${TTS_PLAYBACK_VOLUME:-0.8}
+    TTS_ECHO_DEBOUNCE_MS: ${TTS_ECHO_DEBOUNCE_MS:-350}
+    MEETING_EVENT_SNAPSHOT_INTERVAL: ${MEETING_EVENT_SNAPSHOT_INTERVAL:-50}
+    MEETING_RECOVERY_ENABLED: ${MEETING_RECOVERY_ENABLED:-true}
+    RULE_INTENTS_ENABLED: ${RULE_INTENTS_ENABLED:-true}
+    LLM_INTENTS_ENABLED: ${LLM_INTENTS_ENABLED:-false}
+    LLM_BASE_URL: ${LLM_BASE_URL:-http://lingxu-ollama:11434/v1}
+    LLM_MODEL: ${LLM_MODEL:-qwen3.5:9b}
+    LLM_MODEL_DIGEST: ${LLM_MODEL_DIGEST:-6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7}
+    LLM_INTENT_CONFIDENCE_THRESHOLD: ${LLM_INTENT_CONFIDENCE_THRESHOLD:-0.80}
+    LLM_TIMEOUT_SECONDS: ${LLM_TIMEOUT_SECONDS:-180}
+    LLM_MAX_OUTPUT_TOKENS: ${LLM_MAX_OUTPUT_TOKENS:-64}
+    LLM_MAX_UTTERANCE_CHARS: ${LLM_MAX_UTTERANCE_CHARS:-1000}
+    LLM_ALLOW_REMOTE: ${LLM_ALLOW_REMOTE:-false}
+    AGENDA_IMPORT_LLM_ENABLED: ${AGENDA_IMPORT_LLM_ENABLED:-true}
+    AGENDA_IMPORT_LLM_BASE_URL: ${AGENDA_IMPORT_LLM_BASE_URL:-http://lingxu-ollama:11434/v1}
+    AGENDA_IMPORT_LLM_MODEL: ${AGENDA_IMPORT_LLM_MODEL:-qwen3.5:9b}
+    AGENDA_IMPORT_LLM_MODEL_DIGEST: ${AGENDA_IMPORT_LLM_MODEL_DIGEST:-6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7}
+    AGENDA_IMPORT_LLM_TIMEOUT_SECONDS: ${AGENDA_IMPORT_LLM_TIMEOUT_SECONDS:-180}
+    AGENDA_IMPORT_LLM_MAX_OUTPUT_TOKENS: ${AGENDA_IMPORT_LLM_MAX_OUTPUT_TOKENS:-1536}
+    AGENDA_IMPORT_MAX_ATTACHMENT_BYTES: ${AGENDA_IMPORT_MAX_ATTACHMENT_BYTES:-65536}
+    AGENDA_IMPORT_MAX_SOURCE_CHARS: ${AGENDA_IMPORT_MAX_SOURCE_CHARS:-30000}
+    AGENDA_IMPORT_MAX_BLOCKS: ${AGENDA_IMPORT_MAX_BLOCKS:-400}
+    AGENDA_IMPORT_MAX_CHUNK_CHARS: ${AGENDA_IMPORT_MAX_CHUNK_CHARS:-2500}
+    AGENDA_IMPORT_MAX_CHUNKS: ${AGENDA_IMPORT_MAX_CHUNKS:-12}
+    AGENDA_IMPORT_MAX_ITEMS: ${AGENDA_IMPORT_MAX_ITEMS:-50}
+    AGENDA_IMPORT_CONFIDENCE_THRESHOLD: ${AGENDA_IMPORT_CONFIDENCE_THRESHOLD:-0.65}
+    AGENDA_IMPORT_DEFAULT_DURATION_MINUTES: ${AGENDA_IMPORT_DEFAULT_DURATION_MINUTES:-15}
+    AGENDA_IMPORT_DEFAULT_VOTE_SECONDS: ${AGENDA_IMPORT_DEFAULT_VOTE_SECONDS:-60}
+    AGENDA_IMPORT_LLM_ALLOW_REMOTE: ${AGENDA_IMPORT_LLM_ALLOW_REMOTE:-false}
+    HOST_CONSOLE_ENABLED: ${HOST_CONSOLE_ENABLED:-false}
+    HOST_CONSOLE_BIND_HOST: 0.0.0.0
+    HOST_CONSOLE_PORT: ${HOST_CONSOLE_PORT:-8765}
+    HOST_CONSOLE_GUILD_ID: ${HOST_CONSOLE_GUILD_ID:-}
+    DEFAULT_SPEAKER_SECONDS: ${DEFAULT_SPEAKER_SECONDS:-180}
+    DEFAULT_VOTE_SECONDS: ${DEFAULT_VOTE_SECONDS:-60}
+    DEFAULT_DISCUSSION_SECONDS: ${DEFAULT_DISCUSSION_SECONDS:-900}
+    REQUIRE_RECORDING_CONSENT: ${REQUIRE_RECORDING_CONSENT:-true}
+    RECORDING_AUDIO_QUEUE_MAX_FRAMES: ${RECORDING_AUDIO_QUEUE_MAX_FRAMES:-5000}
+    RECORDING_SILENCE_SPLIT_MS: ${RECORDING_SILENCE_SPLIT_MS:-800}
+    RECORDING_SILENCE_THRESHOLD: ${RECORDING_SILENCE_THRESHOLD:-256}
+    RECORDING_MAX_SEGMENT_SECONDS: ${RECORDING_MAX_SEGMENT_SECONDS:-300}
+    AUDIO_RETENTION_HOURS: ${AUDIO_RETENTION_HOURS:-24}
+  volumes:
+    - lingxu-data:/data
+    - lingxu-models:/models
+  tmpfs:
+    - /runtime:uid=10001,gid=10001,mode=0700,size=64m
+  security_opt:
+    - no-new-privileges:true
+  cap_drop:
+    - ALL
+
+x-lingxu-migration-environment: &lingxu-migration-environment
+  DATABASE_URL: sqlite+aiosqlite:////data/lingxu.db
+
+x-lingxu-worker-environment: &lingxu-worker-environment
+  DATABASE_URL: sqlite+aiosqlite:////data/lingxu.db
+  DATA_ROOT: /data/sessions
+  GLOSSARY_ROOT: /data/glossaries
+  RUNTIME_TMP: /runtime
+  MODEL_CACHE_DIR: /models
+  MODELSCOPE_CACHE: /models/modelscope
+  LOG_LEVEL: ${LOG_LEVEL:-INFO}
+  WORKER_POLL_INTERVAL_SECONDS: ${WORKER_POLL_INTERVAL_SECONDS:-2}
+  WORKER_JOB_LOCK_SECONDS: ${WORKER_JOB_LOCK_SECONDS:-600}
+  WORKER_JOB_MAX_ATTEMPTS: ${WORKER_JOB_MAX_ATTEMPTS:-3}
+  REALTIME_ASR_PROVIDER: ${REALTIME_ASR_PROVIDER:-sensevoice}
+  REALTIME_ASR_MODEL: ${REALTIME_ASR_MODEL:-iic/SenseVoiceSmall}
+  REALTIME_ASR_MODEL_REVISION: ${REALTIME_ASR_MODEL_REVISION:-master}
+  REALTIME_ASR_MODEL_SHA256: ${REALTIME_ASR_MODEL_SHA256:-833ca2dcfdf8ec91bd4f31cfac36d6124e0c459074d5e909aec9cabe6204a3ea}
+  REALTIME_ASR_VAD_MODEL: ${REALTIME_ASR_VAD_MODEL:-fsmn-vad}
+  REALTIME_ASR_VAD_MODEL_REVISION: ${REALTIME_ASR_VAD_MODEL_REVISION:-v2.0.4}
+  REALTIME_ASR_VAD_MODEL_SHA256: ${REALTIME_ASR_VAD_MODEL_SHA256:-b3be75be477f0780277f3bae0fe489f48718f585f3a6e45d7dd1fbb1a4255fc5}
+  REALTIME_ASR_LANGUAGE_MODE: ${REALTIME_ASR_LANGUAGE_MODE:-auto}
+  REALTIME_ASR_HOTWORDS: ${REALTIME_ASR_HOTWORDS:-}
+  AUDIO_RETENTION_HOURS: ${AUDIO_RETENTION_HOURS:-24}
+  SUMMARY_LLM_ENABLED: ${SUMMARY_LLM_ENABLED:-true}
+  SUMMARY_LLM_BASE_URL: ${SUMMARY_LLM_BASE_URL:-https://api.deepseek.com}
+  SUMMARY_LLM_MODEL: ${SUMMARY_LLM_MODEL:-deepseek-flash}
+  SUMMARY_LLM_MODEL_DIGEST: ${SUMMARY_LLM_MODEL_DIGEST:-4a87243abc84b3147f3e9c2fc3416e539ae1ebd634706612996fc62018d32a0f}
+  SUMMARY_LLM_TIMEOUT_SECONDS: ${SUMMARY_LLM_TIMEOUT_SECONDS:-1200}
+  SUMMARY_LLM_MAX_OUTPUT_TOKENS: ${SUMMARY_LLM_MAX_OUTPUT_TOKENS:-32768}
+  SUMMARY_FINAL_MINUTES_MAX_OUTPUT_TOKENS: ${SUMMARY_FINAL_MINUTES_MAX_OUTPUT_TOKENS:-131072}
+  SUMMARY_LLM_MAX_INPUT_CHARS: ${SUMMARY_LLM_MAX_INPUT_CHARS:-6000}
+  SUMMARY_LLM_ALLOW_REMOTE: ${SUMMARY_LLM_ALLOW_REMOTE:-true}
+
+services:
+  lingxu-tts:
+    image: ${LINGXU_TTS_IMAGE:-lingxu-lingxu-tts}:${LINGXU_TTS_IMAGE_TAG:-latest}
+    build: *lingxu-tts-build
+    restart: unless-stopped
+    init: true
+    read_only: true
+    environment:
+      HOME: /tmp
+      MPLCONFIGDIR: /tmp/matplotlib
+      NUMBA_CACHE_DIR: /tmp/numba
+      XDG_CACHE_HOME: /tmp/cache
+      TTS_MODEL: ${TTS_MODEL:-FunAudioLLM/CosyVoice-300M-SFT}
+      TTS_MODEL_REVISION: ${TTS_MODEL_REVISION:-fbb71de2afe387ed854eebd80b9f3d078c6b9869}
+      TTS_MODEL_DIGEST: ${TTS_MODEL_DIGEST:-3a80af814cfd832dadbf1fe677adf08e30f64b8bdcd52b997184515fb33d2198}
+      TTS_MODEL_DIR: /models/cosyvoice-300m-sft
+      TTS_TEXT_NORMALIZER_DIR: /models/wetext-tn
+      TTS_VOICE: ${TTS_VOICE:-中文女}
+    volumes:
+      - lingxu-cosyvoice:/models:ro
+    tmpfs:
+      - /tmp:uid=10002,gid=10002,mode=0700,size=256m
+    networks:
+      - lingxu-tts
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  lingxu-tts-downloader:
+    profiles:
+      - model-download
+    image: ${LINGXU_TTS_IMAGE:-lingxu-lingxu-tts}:${LINGXU_TTS_IMAGE_TAG:-latest}
+    init: true
+    restart: "no"
+    read_only: true
+    environment:
+      HOME: /tmp
+      HF_HUB_DOWNLOAD_TIMEOUT: "120"
+      HF_HUB_ETAG_TIMEOUT: "30"
+      TTS_MODEL: ${TTS_MODEL:-FunAudioLLM/CosyVoice-300M-SFT}
+      TTS_MODEL_REVISION: ${TTS_MODEL_REVISION:-fbb71de2afe387ed854eebd80b9f3d078c6b9869}
+      TTS_MODEL_DIGEST: ${TTS_MODEL_DIGEST:-3a80af814cfd832dadbf1fe677adf08e30f64b8bdcd52b997184515fb33d2198}
+      TTS_MODEL_DIR: /models/cosyvoice-300m-sft
+      TTS_TEXT_NORMALIZER_DIR: /models/wetext-tn
+    command: ["python", "/opt/lingxu-tts/download_model.py"]
+    volumes:
+      - lingxu-cosyvoice:/models
+    tmpfs:
+      - /tmp:uid=10002,gid=10002,mode=0700,size=256m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  lingxu-ollama:
+    image: ollama/ollama:0.21.2@sha256:2038a264392af4d21f7f14e1568e8dd9aa0f2bd0f31d7d9a59a8cca1e9829663
+    restart: unless-stopped
+    init: true
+    environment:
+      OLLAMA_CONTEXT_LENGTH: "4096"
+      OLLAMA_DEBUG_LOG_REQUESTS: "false"
+      OLLAMA_FLASH_ATTENTION: "1"
+      OLLAMA_KEEP_ALIVE: "30m"
+      OLLAMA_LOAD_TIMEOUT: "10m"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_NO_CLOUD: "true"
+      OLLAMA_NOHISTORY: "true"
+      OLLAMA_NUM_PARALLEL: "1"
+    volumes:
+      - lingxu-ollama:/root/.ollama
+    networks:
+      - lingxu-llm
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    healthcheck:
+      test: ["CMD", "ollama", "show", "qwen3.5:9b"]
+      interval: 15s
+      timeout: 10s
+      start_period: 20s
+      retries: 20
+
+  lingxu-ollama-downloader:
+    profiles:
+      - model-download
+    image: ollama/ollama:0.21.2@sha256:2038a264392af4d21f7f14e1568e8dd9aa0f2bd0f31d7d9a59a8cca1e9829663
+    init: true
+    restart: "no"
+    environment:
+      OLLAMA_HOST: 127.0.0.1:11434
+    entrypoint: ["/bin/sh", "-ec"]
+    command:
+      - >-
+        ollama serve &
+        server_pid=$$!;
+        trap 'kill "$$server_pid"' EXIT;
+        until ollama list >/dev/null 2>&1; do sleep 1; done;
+        ollama pull qwen3.5:9b
+    volumes:
+      - lingxu-ollama:/root/.ollama
+
+  lingxu-wakeword-downloader:
+    profiles:
+      - model-download
+    build: .
+    init: true
+    restart: "no"
+    read_only: true
+    environment:
+      MODEL_CACHE_DIR: /models
+    command: ["python", "/app/scripts/download_wakeword_model.py"]
+    volumes:
+      - lingxu-models:/models
+    tmpfs:
+      - /tmp:uid=10001,gid=10001,mode=0700,size=96m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  lingxu-asr-downloader:
+    profiles:
+      - model-download
+    build: .
+    init: true
+    restart: "no"
+    read_only: true
+    environment:
+      MODEL_CACHE_DIR: /models
+      MODELSCOPE_CACHE: /models/modelscope
+      REALTIME_ASR_PROVIDER: ${REALTIME_ASR_PROVIDER:-sensevoice}
+      REALTIME_ASR_MODEL: ${REALTIME_ASR_MODEL:-iic/SenseVoiceSmall}
+      REALTIME_ASR_MODEL_REVISION: ${REALTIME_ASR_MODEL_REVISION:-master}
+      REALTIME_ASR_MODEL_SHA256: ${REALTIME_ASR_MODEL_SHA256:-833ca2dcfdf8ec91bd4f31cfac36d6124e0c459074d5e909aec9cabe6204a3ea}
+      REALTIME_ASR_VAD_MODEL: ${REALTIME_ASR_VAD_MODEL:-fsmn-vad}
+      REALTIME_ASR_VAD_MODEL_REVISION: ${REALTIME_ASR_VAD_MODEL_REVISION:-v2.0.4}
+      REALTIME_ASR_VAD_MODEL_SHA256: ${REALTIME_ASR_VAD_MODEL_SHA256:-b3be75be477f0780277f3bae0fe489f48718f585f3a6e45d7dd1fbb1a4255fc5}
+    command: ["python", "/app/scripts/download_asr_models.py"]
+    volumes:
+      - lingxu-models:/models
+    tmpfs:
+      - /tmp:uid=10001,gid=10001,mode=0700,size=96m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+
+  lingxu-migrate:
+    <<: *lingxu-common
+    build: *lingxu-app-build
+    command: ["python", "-m", "lingxu.storage.migrate"]
+    restart: "no"
+    environment:
+      <<: *lingxu-migration-environment
+    volumes:
+      - lingxu-data:/data
+    healthcheck:
+      disable: true
+
+  lingxu-bot:
+    <<: *lingxu-common
+    command: ["python", "-m", "lingxu.bot_main"]
+    environment:
+      <<: *lingxu-bot-environment
+      DISCORD_TOKEN: ${DISCORD_TOKEN:-}
+      FILE_ENCRYPTION_KEY: ${FILE_ENCRYPTION_KEY:-}
+      LLM_API_KEY: ${LLM_API_KEY:-}
+      MEETING_ASSISTANT_LLM_API_KEY: ${MEETING_ASSISTANT_LLM_API_KEY:-}
+      AGENDA_IMPORT_LLM_API_KEY: ${AGENDA_IMPORT_LLM_API_KEY:-}
+      HOST_CONSOLE_TOKEN: ${HOST_CONSOLE_TOKEN:-}
+    depends_on:
+      lingxu-migrate:
+        condition: service_completed_successfully
+      lingxu-ollama:
+        condition: service_healthy
+      lingxu-tts:
+        condition: service_healthy
+    networks:
+      - default
+      - lingxu-llm
+      - lingxu-tts
+    ports:
+      - "127.0.0.1:${HOST_CONSOLE_PORT:-8765}:${HOST_CONSOLE_PORT:-8765}"
+
+  lingxu-worker:
+    <<: *lingxu-common
+    command: ["python", "-m", "lingxu.worker_main"]
+    environment:
+      <<: *lingxu-worker-environment
+      DISCORD_TOKEN: ${DISCORD_TOKEN:-}
+      FILE_ENCRYPTION_KEY: ${FILE_ENCRYPTION_KEY:-}
+      SUMMARY_LLM_API_KEY: ${SUMMARY_LLM_API_KEY:-}
+    depends_on:
+      lingxu-migrate:
+        condition: service_completed_successfully
+    networks:
+      - default
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "from pathlib import Path; raise SystemExit(0 if Path('/runtime/worker.ready').is_file() else 1)",
+        ]
+      interval: 10s
+      timeout: 5s
+      start_period: 20s
+      retries: 3
+
+volumes:
+  lingxu-data:
+    name: lingxu-data
+  lingxu-models:
+    name: lingxu-models
+  lingxu-ollama:
+    name: lingxu-ollama
+  lingxu-cosyvoice:
+    name: lingxu-cosyvoice
+
+networks:
+  lingxu-llm:
+    name: lingxu-llm
+    internal: true
+  lingxu-tts:
+    name: lingxu-tts
+    internal: true

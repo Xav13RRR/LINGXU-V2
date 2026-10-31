@@ -1,0 +1,11 @@
+#!/bin/sh
+set -eu
+cd "$(git rev-parse --show-toplevel)"
+if [ -x .venv/Scripts/python.exe ]; then
+    exec .venv/Scripts/python.exe -m scripts.check_public_files --index
+elif [ -x .venv/bin/python ]; then
+    exec .venv/bin/python -m scripts.check_public_files --index
+else
+    echo 'Lingxu: run uv sync --all-extras --frozen before committing; no unchecked fallback.' >&2
+    exit 1
+fi

@@ -1,0 +1,59 @@
+FROM pytorch/pytorch:2.3.1-cuda12.1-cudnn8-runtime@sha256:fc47f8018254e6df30f48c48f2db1c758d44de21a8c553de1a1c451a65baa70a
+
+ARG COSYVOICE_REPO_SHA=074ca6dc9e80a2f424f1f74b48bdd7d3fea531cc
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    HF_HUB_DISABLE_TELEMETRY=1 \
+    HF_HUB_ENABLE_HF_TRANSFER=0 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/opt/CosyVoice:/opt/CosyVoice/third_party/Matcha-TTS \
+    TOKENIZERS_PARALLELISM=false
+
+RUN apt-get update \
+    && apt-get install --no-install-recommends -y \
+        build-essential \
+        ca-certificates \
+        ffmpeg \
+        git \
+        git-lfs \
+        libsox-dev \
+        sox \
+    && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /opt
+RUN git init CosyVoice \
+    && cd CosyVoice \
+    && git remote add origin https://github.com/FunAudioLLM/CosyVoice.git \
+    && git fetch --depth 1 origin "${COSYVOICE_REPO_SHA}" \
+    && git checkout --detach FETCH_HEAD \
+    && git submodule update --init --recursive --depth 1 \
+    && test "$(git rev-parse HEAD)" = "${COSYVOICE_REPO_SHA}" \
+    && rm -rf .git
+
+COPY services/cosyvoice/requirements.txt /tmp/cosyvoice-requirements.txt
+RUN python -m pip install --no-cache-dir setuptools==69.5.1 wheel==0.43.0 \
+    && python -m pip install --no-build-isolation --no-cache-dir \
+        --requirement /tmp/cosyvoice-requirements.txt \
+    && python -m pip install --no-cache-dir --no-deps typing-extensions==4.14.1 \
+    && python -m pip check \
+    && rm /tmp/cosyvoice-requirements.txt
+
+RUN groupadd --gid 10002 lingxu-tts \
+    && useradd --uid 10002 --gid 10002 --no-create-home --shell /usr/sbin/nologin lingxu-tts \
+    && mkdir -p /models /opt/lingxu-tts \
+    && chown -R 10002:10002 /models /opt/lingxu-tts
+
+COPY --chown=10002:10002 services/cosyvoice/ /opt/lingxu-tts/
+
+USER 10002:10002
+WORKDIR /opt/lingxu-tts
+
+HEALTHCHECK --interval=15s --timeout=8s --start-period=300s --retries=5 \
+    CMD ["python", "/opt/lingxu-tts/healthcheck.py"]
+
+CMD ["python", "/opt/lingxu-tts/server.py"]
+
+ARG TTS_BUILD_FINGERPRINT="unknown"
+
+LABEL io.lingxu.tts.build-fingerprint="${TTS_BUILD_FINGERPRINT}"

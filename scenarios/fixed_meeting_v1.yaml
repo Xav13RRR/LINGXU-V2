@@ -1,0 +1,69 @@
+schema_version: 1
+key: fixed-meeting
+name: Fixed Meeting Template
+initial_state: CREATED
+states:
+  - id: CREATED
+    label: Created
+  - id: AWAITING_PARTICIPANTS
+    label: Awaiting participants
+    actions: [publish_host_panel, request_consent]
+  - id: CONSENT_CHECK
+    label: Consent check
+    actions: [validate_consents]
+  - id: OPENING
+    label: Opening
+    actions: [speak_welcome]
+  - id: AGENDA_OVERVIEW
+    label: Agenda overview
+    actions: [speak_agenda]
+  - id: AGENDA_ITEM_INTRO
+    label: Agenda item introduction
+    actions: [speak_current_agenda_item]
+  - id: DISCUSSION_READY
+    label: Discussion ready
+    actions: [select_next_speaker]
+  - id: SPEAKER_ACTIVE
+    label: Speaker active
+    actions: [start_speaker_timer]
+  - id: DISCUSSION_COMPLETE
+    label: Discussion complete
+    actions: [cancel_speaker_timer]
+  - id: VOTE_OPEN
+    label: Vote open
+    actions: [open_vote, start_vote_timer]
+  - id: VOTE_RESULT
+    label: Vote result
+    actions: [close_vote, speak_vote_result]
+  - id: NEXT_AGENDA_ITEM
+    label: Next agenda item
+    actions: [advance_agenda]
+  - id: CLOSING
+    label: Closing
+    actions: [speak_closing, finalise_capture]
+  - id: COMPLETED
+    label: Completed
+    actions: [trigger_post_meeting_job]
+  - id: POST_PROCESSING
+    label: Post processing
+    actions: [monitor_post_meeting_job]
+  - id: PUBLISHED
+    label: Published
+    actions: [publish_completion]
+    terminal: true
+transitions:
+  - {from_state: CREATED, event: MEETING_INITIALISED, to_state: AWAITING_PARTICIPANTS}
+  - {from_state: AWAITING_PARTICIPANTS, event: MEETING_STARTED, to_state: CONSENT_CHECK}
+  - {from_state: CONSENT_CHECK, event: STATE_ADVANCED, to_state: OPENING}
+  - {from_state: OPENING, event: STATE_ADVANCED, to_state: AGENDA_OVERVIEW}
+  - {from_state: AGENDA_OVERVIEW, event: STATE_ADVANCED, to_state: AGENDA_ITEM_INTRO}
+  - {from_state: AGENDA_ITEM_INTRO, event: STATE_ADVANCED, to_state: DISCUSSION_READY}
+  - {from_state: DISCUSSION_READY, event: STATE_ADVANCED, to_state: SPEAKER_ACTIVE}
+  - {from_state: SPEAKER_ACTIVE, event: STATE_ADVANCED, to_state: DISCUSSION_COMPLETE}
+  - {from_state: DISCUSSION_COMPLETE, event: STATE_ADVANCED, to_state: VOTE_OPEN}
+  - {from_state: VOTE_OPEN, event: STATE_ADVANCED, to_state: VOTE_RESULT}
+  - {from_state: VOTE_RESULT, event: STATE_ADVANCED, to_state: NEXT_AGENDA_ITEM}
+  - {from_state: NEXT_AGENDA_ITEM, event: STATE_ADVANCED, to_state: CLOSING}
+  - {from_state: CLOSING, event: STATE_ADVANCED, to_state: COMPLETED}
+  - {from_state: COMPLETED, event: STATE_ADVANCED, to_state: POST_PROCESSING}
+  - {from_state: POST_PROCESSING, event: STATE_ADVANCED, to_state: PUBLISHED}

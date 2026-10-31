@@ -1,0 +1,131 @@
+[build-system]
+requires = ["hatchling==1.28.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "lingxu"
+version = "0.1.0"
+description = "聆序 LINGXU — a local-first Discord voice meeting host and resident assistant"
+readme = "README.md"
+requires-python = ">=3.12,<3.13"
+license = "Apache-2.0"
+license-files = ["LICENSE", "NOTICE"]
+authors = [{ name = "聆序 LINGXU Contributors" }]
+dependencies = [
+    "aiohttp==3.14.3",
+    "aiosqlite==0.22.1",
+    "alembic==1.18.5",
+    "cryptography==49.0.0",
+    "davey==0.1.6",
+    "discord-ext-voice-recv @ git+https://github.com/vocolboy/discord-ext-voice-recv.git@ee160c0f36516927b6214bc9d6babe524016770f",
+    "discord.py[voice]==2.7.1",
+    "funasr==1.3.27",
+    "imageio-ffmpeg==0.6.0",
+    "modelscope==1.38.1",
+    "numpy==2.4.6",
+    "pydantic==2.13.4",
+    "pydantic-settings==2.14.2",
+    "pypinyin==0.55.0",
+    "PyYAML==6.0.3",
+    "sherpa-onnx==1.13.4",
+    "sherpa-onnx-core==1.13.4",
+    "SQLAlchemy[asyncio]==2.0.51",
+    "soundfile==0.13.1",
+    "structlog==26.1.0",
+    "torch==2.11.0",
+    "torchaudio==2.11.0",
+]
+
+[project.urls]
+Repository = "https://github.com/Xav13RRR/LINGXU-V2"
+Documentation = "https://github.com/Xav13RRR/LINGXU-V2/tree/main/docs"
+
+[project.optional-dependencies]
+dev = [
+    "mypy==2.3.0",
+    "pytest==9.1.1",
+    "pytest-asyncio==1.4.0",
+    "ruff==0.16.0",
+]
+
+[project.scripts]
+lingxu = "lingxu.bot_main:main"
+lingxu-doctor = "lingxu.cli.doctor:main"
+lingxu-db = "lingxu.storage.migrate:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/lingxu"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"src/lingxu/resources/deepseek_full_transcript_minutes.md" = "lingxu/resources/deepseek_full_transcript_minutes.md"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.uv.sources]
+torch = { index = "pytorch-cpu" }
+torchaudio = { index = "pytorch-cpu" }
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+extend-exclude = ["data", "PLAN.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "ASYNC", "DTZ", "RUF"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["ARG001"]
+"tests/unit/test_voice_assistant.py" = ["ARG001", "ASYNC110", "RUF001"]
+"src/lingxu/bot/commands.py" = ["RUF001"]
+"src/lingxu/bot/client.py" = ["RUF001"]
+"src/lingxu/bot/meeting_commands.py" = ["RUF001"]
+"src/lingxu/bot/meeting_ui.py" = ["RUF001"]
+"src/lingxu/meeting/components.py" = ["RUF001"]
+"src/lingxu/voice_assistant/*.py" = ["RUF001"]
+"scripts/smoke_meeting_assistant.py" = ["RUF001"]
+
+[tool.ruff.format]
+line-ending = "lf"
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+files = ["src", "scripts"]
+mypy_path = "src"
+show_error_codes = true
+warn_unreachable = true
+
+[[tool.mypy.overrides]]
+module = [
+    "funasr",
+    "funasr.*",
+    "imageio_ffmpeg",
+    "modelscope",
+    "modelscope.*",
+    "soundfile",
+    "sherpa_onnx",
+    "sherpa_onnx.*",
+    "torch",
+    "torch.*",
+    "torchaudio",
+    "torchaudio.*",
+    "yaml",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+asyncio_mode = "strict"
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "integration: exercises multiple local components",
+    "manual: requires a real Discord guild, independent token, and human participants",
+]
