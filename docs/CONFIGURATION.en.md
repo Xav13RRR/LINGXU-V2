@@ -76,8 +76,7 @@ or automatically cloud-synchronized directories.
 Use the deployment guide's manual commands only after providing credentials, downloading models,
 checking for active work and backing up existing data. Compose process variables override `.env`;
 check for stale overrides without printing values. Only the pinned provider/model is supported.
-A fresh non-Windows installation still needs independent acceptance; workstation GPU validation is
-not evidence of validation on another host.
+Validate each new deployment on its actual operating system and hardware.
 
 ## 5. Generate the encryption key and update credentials
 

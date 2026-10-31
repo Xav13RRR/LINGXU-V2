@@ -74,7 +74,7 @@ git --version
 
 ## 4. 获取代码并创建本地配置
 
-使用独立公开仓库 `Xav13RRR/LINGXU-V2`，不要把私有工程档案当成分发源。
+从 `Xav13RRR/LINGXU-V2` 克隆源码。
 请配置自己的凭据，已有 `.env` 不应覆盖：
 
 ```powershell
@@ -255,7 +255,7 @@ docker compose exec -T lingxu-bot python scripts/smoke_agenda_import.py
   不再并发执行 DDL；
 - `lingxu-bot`、`lingxu-worker`、`lingxu-ollama`、`lingxu-tts` 均为 `healthy`；
 - Bot 日志出现 `application_commands_synced`；默认常驻配置下在 Discord 验证 `/meeting`、
-  `/assistant`、`/wakeup`，不要再以旧版 count 为 2 作为验收条件；
+  `/assistant`、`/wakeup`；
 - Bot 日志出现 `bot_ready`；
 - Doctor 的 Discord、加密、ASR、KWS、Ollama、TTS 和 DAVE 检查通过；
 - `http://127.0.0.1:8765/healthz` 仅在启用主持台后本机可访问；

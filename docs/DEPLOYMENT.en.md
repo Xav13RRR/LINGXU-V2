@@ -78,7 +78,7 @@ project's token.
 
 ## 4. Clone and create the local configuration
 
-Use the independent public `Xav13RRR/LINGXU-V2` repository, not the private engineering archive.
+Clone the source from `Xav13RRR/LINGXU-V2`.
 Supply your own credentials and never overwrite an existing `.env`:
 
 ```powershell
