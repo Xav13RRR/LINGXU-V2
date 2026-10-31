@@ -112,9 +112,10 @@ def test_apache_metadata_and_owner_confirmed_banner_are_explicit() -> None:
     assert project["license"] == "Apache-2.0"
     assert set(project["license-files"]) == {"LICENSE", "NOTICE"}
     assert "![" in (root / "README.md").read_text(encoding="utf-8")
-    assert "OWNER_CONFIRMED_APACHE_2_0" in (root / "docs/ASSET_PROVENANCE.md").read_text(
-        encoding="utf-8"
-    )
+    status = json.loads((root / "PUBLICATION_STATUS.json").read_text(encoding="utf-8"))
+    assert status["banner"] == "owner_confirmed"
+    assert status["banner_license"] == "Apache-2.0"
+    assert (root / "docs/assets/lingxu-banner.png").is_file()
     assert project["urls"]["Repository"] == publication._PUBLIC_REPOSITORY_URL
     assert "Copyright 2026 Xav13RRR." in (root / "NOTICE").read_text(encoding="utf-8")
 

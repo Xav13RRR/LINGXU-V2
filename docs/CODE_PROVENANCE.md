@@ -1,17 +1,17 @@
 # Code provenance / 代码来源
 
-Copyright 2026 Xav13RRR. The owner confirms authority over the migrated code and related tests
-and authorizes Apache-2.0 distribution without exceptions. Lingji remains their private repository,
-not a runtime dependency. See [authorization](RIGHTS_CLEARANCE.md) and [NOTICE](../NOTICE).
+Copyright 2026 Xav13RRR. The Lingji-derived code and related tests distributed in this repository
+are licensed under Apache-2.0. Lingxu does not import or call Lingji at runtime.
+See [licence scope](RIGHTS_CLEARANCE.md) and [NOTICE](../NOTICE).
 
-所有者已确认迁移代码和相关测试的授权无例外。下面保留来源关系与改写分类，不公开私有仓库的
-提交指纹、实际会议样本、运行证据或统计；这些记录不是程序运行依赖。
+本仓库中源自 Lingji 的代码和相关测试采用 Apache-2.0。下表记录来源和改动分类；
+Lingxu 运行时不导入或调用 Lingji。
 
 ## Retained migration relationships
 
 Paths in the reference column are historical Lingji source paths, not files imported at runtime.
-Original proprietary status is historical; the owner's subsequent Apache-2.0 grant applies to
-the retained Lingxu derivatives. Third-party libraries retain their separate licences.
+The Lingji source was proprietary; the Lingxu derivatives are distributed under Apache-2.0.
+Third-party libraries retain their separate licences.
 
 | Lingxu target | Lingji reference | Classification | Main adaptation / verification |
 | --- | --- | --- | --- |
@@ -26,19 +26,15 @@ the retained Lingxu derivatives. Third-party libraries retain their separate lic
 | `src/lingxu/voice/opus_guard.py` | `src/lingji/voice/opus_guard.py` | Copied and adapted | Allowlisted content-free decoder diagnostics |
 | `src/lingxu/voice/sink.py` | `src/lingji/voice/sink.py` | Copied and adapted | Independent consent-aware non-blocking capture |
 | `src/lingxu/bot/client.py`, `src/lingxu/bot_main.py` | `src/lingji/bot/client.py`, `src/lingji/main.py` | Rewritten | Independent application, services and command surface |
-| Related unit/voice integration tests | Historical Lingji test modules | Rewritten and expanded | Owner authorization covers the retained test scope; use synthetic inputs only |
+| Related unit/voice integration tests | Historical Lingji test modules | Rewritten and expanded | Synthetic configuration, lifecycle, voice and integration coverage |
 
-Historical wildcard test provenance is not represented as a line-by-line copyright audit.
-Retired probe-specific modules and private-data-dependent tests are not part of this public baseline.
 Subsequent storage, deterministic Runtime, ASR/TTS integration, Worker, scenario, console, privacy,
 publication and repository-safety components were implemented for the independent Lingxu project.
-No new Lingji copying or runtime connection occurs in the publication preparation.
 
 ## Notices and verification
 
-The original internal proprietary notice is superseded for the authorized derivatives by the
-owner's Apache-2.0 grant. Copyright attribution remains Xav13RRR. Dependencies and external model
-assets keep their original notices; refer to [DEPENDENCIES.md](DEPENDENCIES.md) and
+Dependencies and external model assets keep their original notices; refer to
+[DEPENDENCIES.md](DEPENDENCIES.md) and
 [MODELS.md](MODELS.md). A later binary/image distribution needs its own actual-component audit.
 
 Public validation uses configuration, logging, voice, consent, lifecycle, namespace-independence

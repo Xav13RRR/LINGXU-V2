@@ -1,6 +1,6 @@
 # Fixed Meeting State Machine
 
-Product Stage 1 uses one deterministic forward sequence:
+The meeting runtime uses one deterministic forward sequence:
 
 ```text
 CREATED
@@ -25,7 +25,7 @@ Global states are `PAUSED`, `STOPPED`, `INTERRUPTED`, the four explicit failure 
 `DELETED`.
 
 Only `MeetingRuntime` chooses a target state. Slash commands, buttons, ASR rule intents, TTS,
-Worker jobs, and future LLM candidates submit commands; they never write state directly.
+Worker jobs and LLM candidates submit commands; they never write state directly.
 
 ## Commands and events
 

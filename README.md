@@ -14,25 +14,18 @@
 
 [CI / 自动验证](https://github.com/Xav13RRR/LINGXU-V2/actions/workflows/ci.yml)
 
-> `Xav13RRR/LINGXU-V2` 是经所有者授权的独立开源仓库，采用 [Apache-2.0](LICENSE)。
-> 迁移代码、相关测试和 Banner 的权利已确认；初始源码不带旧 Git 历史、真实会议记录或密钥。
-> 请配置自己的 Discord 和 API 凭据；开源发布不改变任何现有本地运行服务。
-> 见[授权记录](docs/RIGHTS_CLEARANCE.md)。
+> 本项目采用 [Apache-2.0](LICENSE)。部署时请配置自己的 Discord 和 API 凭据。
 >
-> `Xav13RRR/LINGXU-V2` is an independently initialized, owner-authorized [Apache-2.0](LICENSE) repository.
-> Migrated code, related tests and the banner are cleared. The initial source carries no old Git
-> history, real meeting records or credentials. Configure your own Discord/API credentials;
-> source publication does not deploy or change an existing installation.
-> See the [authorization record](docs/RIGHTS_CLEARANCE.md).
+> Licensed under [Apache-2.0](LICENSE). Configure your own Discord and API credentials before deployment.
 
 > 当前仓库是聆序 LINGXU 的独立部署版本。Discord、语音、ASR、TTS、数据库和 Worker
 > 均由本仓库自行部署，不依赖其它项目；议程整理与语音问答使用本地 Qwen，会后最终纪要
-> 使用项目所有者选定的 DeepSeek API。内部包名、容器名和配置前缀继续使用 `lingxu`，以
+> 使用 DeepSeek API。内部包名、容器名和配置前缀使用 `lingxu`，以
 > 保持数据库、Docker 卷和升级兼容性。
 
 > This repository contains the independent deployment of 聆序 LINGXU. Discord voice, ASR, TTS,
 > persistence, and the post-meeting Worker are deployed from this repository alone. Local Qwen
-> handles agenda ingestion and voice Q&A; the owner-selected DeepSeek API generates final minutes.
+> handles agenda ingestion and voice Q&A; the DeepSeek API generates final minutes.
 > Internal package, container, and configuration identifiers remain `lingxu` for compatibility.
 
 ## 中文简介
@@ -62,9 +55,9 @@ Worker 生成逐字稿和结构化会议纪要。会议之外，它还可以作�
 | 本地主持台 | 可选 localhost 控制台，提供认证、实时状态、议程、发言、计时、投票和手工 TTS |
 | 可恢复性 | SQLite/WAL、Alembic、追加式事件、原子文件、加密音频、Worker checkpoint 和重启恢复 |
 
-### 当前本机版本构造
+### 部署架构
 
-当前验证版本运行在 Windows + Docker Desktop + NVIDIA GPU Compose Profile 上：
+Windows GPU 部署使用 Docker Desktop 和 NVIDIA GPU Compose Profile：
 
 ```mermaid
 flowchart LR
@@ -135,9 +128,9 @@ questions without recording or producing transcripts or minutes.
 | Local host console | Optional authenticated localhost UI for status, agenda, consent, speakers, timers, votes, scenarios, and manual TTS |
 | Recovery | SQLite/WAL, Alembic, append-only events, atomic files, encrypted audio, Worker checkpoints, and restart recovery |
 
-### Verified workstation profile
+### Deployment architecture
 
-The currently verified workstation build uses Windows, Docker Desktop, and the NVIDIA GPU Compose
+The Windows GPU deployment uses Docker Desktop and the NVIDIA GPU Compose
 override. It runs four production services: `lingxu-bot`, `lingxu-worker`, `lingxu-ollama`, and
 `lingxu-tts`. Ollama provides local agenda and voice-assistant inference; the Worker sends the
 privacy-filtered complete transcript as compact input to `deepseek-flash`, then validates its
@@ -250,7 +243,7 @@ The publication channel must allow **Attach Files**, or completed minutes may fa
 - 真实会议音频、逐字稿、纪要、运行记录、身份标识和私有测试结果不得进入 GitHub。
 - 已授权会议文字和允许的身份标签会由 Worker 发往 DeepSeek；并非完全离线处理。
 - DPAPI 只保护宿主机上的密文，Docker 管理员仍可查看注入容器的环境变量。
-- 公开仓库只保留合成测试和去标识化工程结论；旧历史留在私有档案，不导入新仓库。
+- 测试使用合成数据；真实会议内容、运行记录和私有样本统计不得提交。
 - 详细提交检查、私密报告方式和数据边界见 [SECURITY.md](SECURITY.md)。
 
 - Real credentials belong only in ignored `.env` or repository-external encrypted credential
@@ -265,14 +258,8 @@ The publication channel must allow **Attach Files**, or completed minutes may fa
 - Consented meeting text and permitted speaker labels leave the host for DeepSeek processing.
 - Persistent user audio is encrypted with AES-256-GCM and controlled by Guild-scoped consent.
 - LLMs are schema-bounded proposal/summary components and cannot mutate meeting state.
-- The owner confirmed Apache-2.0 rights for project code, related tests and the included banner.
-  Third-party models and dependencies keep their own licences. This is a source release, not a
-  production deployment or a claim that every manual acceptance case has passed.
-- Automated tests and deployed local smokes are recorded in [STATE.md](STATE.md) and
+- Test coverage and outstanding manual acceptance checks are documented in
   [docs/TEST_REPORT.md](docs/TEST_REPORT.md).
-- Repeated real formal Meetings and direct project-owner review passed the DAVE duplex, complete
-  Phase 1 E2E, outcome extraction, and native-transcript DeepSeek final-minutes Gates. The retired
-  engineering `/probe` and private annotation-preparation commands are no longer production paths.
 
 ## Documentation / 文档
 
@@ -281,8 +268,8 @@ The publication channel must allow **Attach Files**, or completed minutes may fa
 - [API 与密钥配置](docs/CONFIGURATION.zh-CN.md) / [API and key setup](docs/CONFIGURATION.en.md)
 - [Discord Bot 配置 / Setup](docs/DISCORD_SETUP.md)
 - [Security / 安全](SECURITY.md)
-- [Rights clearance / 授权确认](docs/RIGHTS_CLEARANCE.md)
-- [Publication preparation / 发布准备](docs/PUBLICATION_REVIEW.md)
+- [Licence scope / 许可范围](docs/RIGHTS_CLEARANCE.md)
+- [Source release checks / 源码发布检查](docs/PUBLICATION_REVIEW.md)
 - [Architecture](docs/ARCHITECTURE.md)
 - [Operations](docs/OPERATIONS.md)
 - [Models and immutable identities](docs/MODELS.md)
@@ -294,13 +281,10 @@ The publication channel must allow **Attach Files**, or completed minutes may fa
 ## Licence / 许可证
 
 Copyright © 2026 Xav13RRR. 代码、相关测试及所附 Banner 采用 Apache License 2.0，完整条文见
-[LICENSE](LICENSE)，归属说明见 [NOTICE](NOTICE)。所有者已确认迁移代码和测试的授权无例外，
-Banner 为其自己的素材。此处使用 GitHub 标识署名，不推断其真实姓名。所有者已授权初始公开发布。
-来源表中的 Proprietary 是历史原始许可记录，不否定后续的所有者再许可确认。
+[LICENSE](LICENSE)，归属说明见 [NOTICE](NOTICE)。第三方依赖和模型保留各自许可证。
+详见[许可范围](docs/RIGHTS_CLEARANCE.md)及[代码来源](docs/CODE_PROVENANCE.md)。
 
 Project code, related tests and the included banner use Apache License 2.0; see [LICENSE](LICENSE)
-and [NOTICE](NOTICE). The owner confirmed migrated-code/test authorization with no exceptions and
-ownership of the banner. Attribution uses the public GitHub handle, not an inferred legal name.
-Historical origins remain in [code provenance](docs/CODE_PROVENANCE.md). Third-party dependencies
-and models retain their own licences. The owner authorized this initial source publication;
-see [dependencies](docs/DEPENDENCIES.md) and [authorization](docs/RIGHTS_CLEARANCE.md).
+and [NOTICE](NOTICE). Third-party dependencies and models retain their own licences. See
+[licence scope](docs/RIGHTS_CLEARANCE.md), [code provenance](docs/CODE_PROVENANCE.md)
+and [dependencies](docs/DEPENDENCIES.md).

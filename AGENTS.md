@@ -23,6 +23,8 @@
 - Do not rewrite Git history, change the licence, push, publish, or deploy as part of publication
   preparation without separate project-owner confirmation. A clean tree is not a clean history.
 - Update `STATE.md` after every meaningful implementation step.
+- Write public documentation for users and contributors. Keep conversation excerpts, task handoffs,
+  temporary approvals, preparation diaries and editing instructions out of product and licence docs.
 - Record architectural deviations in `docs/DECISIONS.md`.
 - Prefer working code and tests over speculative prose.
 - Keep Discord user audio tracks separate.
@@ -32,6 +34,5 @@
 - The append-only event log is the process source of truth.
 - The post-meeting pipeline must run in the independently deployed Lingxu Worker.
 - Do not implement TRPG or mystery-game features in this plan.
-- The original first-delivery limit is superseded by recorded project-owner sequencing decisions.
 - Pause before adding any LLM dependency, selecting an LLM provider/model, or enabling an LLM
   call. The project owner must choose the concrete LLM model first.

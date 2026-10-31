@@ -1,7 +1,7 @@
 # Lingxu Privacy Boundary
 
-This document describes the current production data flows. Historical phase headings identify when
-a boundary was introduced; they do not imply that later production paths are inactive.
+Lingxu separates consent for recording, realtime ASR and minutes, and limits data exposure at each
+processing boundary.
 
 - Every formal Meeting participant must run `/meeting consent` in that Guild before persistent
   recording, realtime ASR, or minutes processing accepts their content.
@@ -13,7 +13,7 @@ a boundary was introduced; they do not imply that later production paths are ina
   ignored by Git, are not created by the maintained runtime, and must not be imported into formal
   Meeting storage.
 
-## Phase 2 persisted-file boundary
+## Persisted-file boundary
 
 - Formal Session artifacts use an AES-256-GCM envelope with a random nonce and authenticated
   Lingxu file-format context. The encrypted bytes do not retain a playable media header.
@@ -22,12 +22,12 @@ a boundary was introduced; they do not imply that later production paths are ina
 - The key belongs only in the ignored `.env` or deployment secret store. It must never be committed,
   logged, copied into a manifest, or stored in SQLite.
 - Atomic encryption writes the encrypted envelope through `.part`; decryption is intended only for
-  Worker-controlled temporary processing. Later recording work must put plaintext in the configured
+  Worker-controlled temporary processing. Recording must put plaintext in the configured
   tmpfs and remove it after use.
 - Losing the key makes encrypted Session files unrecoverable. Replacing a key does not rotate
   existing data; rotation requires an explicit decrypt/re-encrypt migration.
 
-## Phase 3 consent and formal recording
+## Consent and formal recording
 
 - Realtime ASR, persistent recording, and minutes inclusion are three independent self-consent
   purposes. `/meeting consent` explicitly grants all three together; internal enforcement continues
@@ -56,7 +56,7 @@ a boundary was introduced; they do not imply that later production paths are ina
 - Personal deletion first stops that user's capture, then removes their exact encrypted directory
   and matching `audio_segments` rows. It does not delete another user's data.
 
-## Phase 4 realtime ASR
+## Realtime ASR
 
 - Realtime ASR uses only `ConsentKind.REALTIME_ASR`; recording or minutes consent never authorises
   transcription.
@@ -70,7 +70,7 @@ a boundary was introduced; they do not imply that later production paths are ina
   detected language codes, and latency, but never PCM or transcript text.
 - Model cache files contain public model weights and official public fixtures, not meeting audio.
 
-## Phase 5 TTS cache and fallback
+## TTS cache and fallback
 
 - TTS source text is sent only from the Bot to the local CosyVoice service on the internal
   `lingxu-tts` network. The service has no host port or external network and suppresses upstream
@@ -84,7 +84,7 @@ a boundary was introduced; they do not imply that later production paths are ina
 - Echo matching is memory-only and expires after playback plus the configured debounce. It is not
   a transcript store.
 
-## Phase 7–11 Meeting and Scenario privacy
+## Meeting and Scenario privacy
 
 - Worker transcript/minutes include only users with explicit `MINUTES` consent.
 - Public vote rows identify voters because the vote is explicitly public.
@@ -102,7 +102,7 @@ a boundary was introduced; they do not imply that later production paths are ina
 - Transcript, evidence, and deterministic minutes remain Meeting content under the same deletion
   and retention boundary.
 
-## Phase 12 local LLM privacy
+## Local LLM privacy
 
 - Meeting text is sent only to `lingxu-ollama` over the private Compose network. The service has
   no published host or LAN port and no cloud API key.
@@ -128,7 +128,7 @@ a boundary was introduced; they do not imply that later production paths are ina
 - This consent-independent path does not grant or alter formal Meeting recording, realtime-ASR, or
   minutes consent. Starting a formal Meeting remains subject to those separate controls.
 
-## M1+P2 Markdown agenda-import privacy
+## Markdown agenda-import privacy
 
 - Only the host may submit one `.md` attachment by directly mentioning the Bot in the Meeting's
   setup channel. The Bot does not follow links or fetch referenced documents.
@@ -150,7 +150,7 @@ a boundary was introduced; they do not imply that later production paths are ina
 
 ## Final post-Meeting minutes and remote-provider privacy
 
-- The current normal final-minutes path uses the project-owner-approved official DeepSeek API and
+- The current normal final-minutes path uses the official DeepSeek API and
   `deepseek-flash`; it is not a local-only inference path. The independent Worker makes the
   request only after applying the durable consent timeline and privacy cutoffs.
 - Participant speech is eligible only when the participant granted `MINUTES` consent for the
@@ -187,7 +187,7 @@ a boundary was introduced; they do not imply that later production paths are ina
   Worker fails startup when its fixed DeepSeek path is disabled or unavailable; it does not publish
   a local-model fallback as final minutes.
 
-## Phase 13 Host console boundary
+## Host console boundary
 
 - The console is bound to localhost and one configured Guild; requests cannot supply another Guild
   or impersonated host ID.

@@ -1,20 +1,15 @@
 Lingxu (聆序 LINGXU)
 Copyright 2026 Xav13RRR.
 
-The project code, related tests and the owner-supplied promotional banner are
+Project code, related tests, documentation and the promotional banner are
 licensed under the Apache License, Version 2.0. See LICENSE for the terms.
 
-Portions were copied or adapted from Lingji; historical origins and modifications
-are recorded in docs/CODE_PROVENANCE.md. The project owner, identified publicly
-as Xav13RRR, confirms ownership/authorization for the migrated code and related
-tests and authorizes Apache-2.0 distribution with no exceptions. Lingji remains
-the owner's private repository and is not a runtime dependency.
+Portions of the code and related tests derive from Lingji, copyright Xav13RRR,
+and are distributed here under Apache-2.0. Source relationships and modifications
+are documented in docs/CODE_PROVENANCE.md.
+
+The banner at docs/assets/lingxu-banner.png is copyright Xav13RRR and is
+distributed under Apache-2.0. See docs/ASSET_PROVENANCE.md.
 
 Third-party dependencies, models and container components retain their own
-licences. Their source/version references are recorded in docs/DEPENDENCIES.md
-and docs/MODELS.md. They are not relicensed by this NOTICE.
-
-The banner at docs/assets/lingxu-banner.png is the owner's material and is
-included under Apache-2.0; see docs/ASSET_PROVENANCE.md and docs/RIGHTS_CLEARANCE.md.
-The owner authorized the initial LINGXU-V2 source publication.
-This NOTICE is informational and does not modify the Apache License terms.
+licences and notices. See docs/DEPENDENCIES.md and docs/MODELS.md.

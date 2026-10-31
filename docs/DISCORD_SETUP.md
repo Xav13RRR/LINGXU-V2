@@ -56,7 +56,7 @@
 
 ### 4. 首次验收与排错
 
-1. 验证 Bot/Worker 和本地模型服务健康，Discord 出现上述命令；不要依赖旧版“两个组”计数。
+1. 验证 Bot/Worker 和本地模型服务健康，Discord 出现上述命令。
 2. 在准备接收纪要的普通文字频道创建会议。参与者按使用指南明确同意录音、实时 ASR 和纪要；
    提前告知会后文字会发送到 DeepSeek。使用合成内容进行首次验收。
 3. 测试语音加入／播报、停止会议，再确认 Worker 最终发送的 `minutes.md` 附件可下载。
@@ -129,7 +129,7 @@ or token failure.
 
 ### 4. First acceptance and troubleshooting
 
-1. Verify healthy Bot/Worker/model services and the commands above, not the obsolete count of two.
+1. Verify healthy Bot/Worker/model services and the commands above.
 2. Create a meeting in the ordinary text channel that should receive minutes. Obtain explicit
    recording/ASR/minutes consent and disclose remote DeepSeek text processing before testing.
    Use synthetic content for initial acceptance.

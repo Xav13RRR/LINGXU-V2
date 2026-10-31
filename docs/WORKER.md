@@ -8,7 +8,7 @@ default application network. Bot voice/assistant/agenda/TTS settings are absent,
 not attached to the internal `lingxu-llm` Ollama network. Post-meeting inference uses only the
 approved official DeepSeek HTTPS endpoint.
 
-## Phase 2 contract
+## Job lifecycle
 
 1. Upgrade the independent database with Alembic.
 2. Run startup recovery for `.part` files, expired leases, manifests, and tombstones.
@@ -23,9 +23,8 @@ The unique `(session_id, job_type, idempotency_key)` constraint makes job creati
 claim is a single SQLite `UPDATE ... RETURNING` operation, so concurrent Workers cannot both own the
 same job.
 
-The Phase 2 skeleton allowlists only `PERSISTENCE_PROBE`, checkpoints
-`PERSISTENCE_READY`, and marks it complete. This verifies Bot-side job creation and independent
-Worker claiming without implementing the later post-meeting business pipeline.
+`PERSISTENCE_PROBE` checkpoints `PERSISTENCE_READY` and completes without model inference.
+It checks Bot-side job creation and independent Worker claiming; meetings use `POST_MEETING`.
 
 ## Run
 
@@ -60,8 +59,7 @@ publication authorities.
 
 The production Worker has one fixed post-meeting inference path: official DeepSeek API
 `deepseek-flash`. It fails startup if that capability is disabled or its exact policy/key is
-missing. The retired local-Qwen summary provider and provider selector are not present; Ollama is a
-Bot-side runtime dependency only for intent, bounded voice answers, and agenda import.
+missing. Ollama is a Bot-side dependency for intent, bounded voice answers and agenda import.
 
 Transcript source keys and Artifact uniqueness make internal stage retries idempotent. Discord
 publication uses a stricter external-side-effect contract: the Worker commits one non-overwriting
@@ -81,7 +79,7 @@ Full authoritative tables and the fixed layout are composed locally, not copied 
 Publication still requires their exact ordered match. Summary lines have private hash-bound source
 bindings in addition to the existing evidence audit. Agenda state, vote counts/results, roster,
 timestamps, and the internal `minutes.json` remain deterministic facts. Thinking-high, the exact
-model identity, and the durable single-attempt guard are unchanged. The final request uses the
+model identity and the durable single-attempt guard apply to every request. The final request uses the
 dedicated `SUMMARY_FINAL_MINUTES_MAX_OUTPUT_TOKENS=131072` ceiling; the separate
 `SUMMARY_LLM_MAX_OUTPUT_TOKENS=32768` continues to bound topic/outcome partitions. Any
 provider or output-contract failure writes its allowlisted error code into the content-free attempt
@@ -94,8 +92,7 @@ failed model journal is preserved. Corrupt source/journal data, cancellation and
 ambiguity retain their failure boundaries. An explicit host `/meeting retry` on a failed Job
 increments a durable attempt generation, preserves the
 prior generation's journal, and authorizes exactly one new request under a distinct attempt file.
-The DeepSeek request has a 1,200-second total transport timeout so a large non-streaming
-thinking-high completion is not cut off by the former 180-second deployment default.
+The DeepSeek request has a 1,200-second total transport timeout for non-streaming thinking-high completion.
 Failed provider attempts also retain a closed `failure_diagnostics` mapping in their generation
 journal. It may contain only phase, elapsed time, HTTP status,
 allowlisted transport/finish categories, content/reasoning presence states, reasoning character
@@ -154,10 +151,10 @@ status/reason. It never sends a Discord message.
 The command and Worker bind publication validation to the deployment's trusted session root. Each
 file in the stored contract must be at its exact canonical Meeting path, be a regular non-symlink
 file, and match the registered byte size and streaming SHA-256 immediately before preparation or
-finalization. A Task 11 intent therefore binds only `minutes.md`; an already stored Task 10 intent
-continues to bind its ordered four-file manifest. Historical Task 10 `FINALIZED` pairs and strict
-legacy receipts remain terminal and never resend. A historical Task 10 `PREPARED` intent is never
-converted to Task 11 automatically: it remains an explicit manual-reconciliation case under its
-stored four-file contract. If any PREPARED file is missing or changed, finalization fails without
+finalization. A `task11-one-file-v1` intent binds only `minutes.md`; an already stored legacy
+four-file intent continues to bind its ordered manifest. Legacy four-file `FINALIZED` pairs and strict
+legacy receipts remain terminal and never resend. A legacy four-file `PREPARED` intent is never
+converted to the single-file contract automatically: it requires manual reconciliation under its
+stored contract. If any PREPARED file is missing or changed, finalization fails without
 modifying the intent or resending. Unknown flags and malformed values also return only the
 allowlisted `invalid_arguments` result; the parser never echoes raw operator input.

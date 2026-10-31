@@ -1,41 +1,34 @@
-# 初始源码发布 / Initial source publication
+# 源码发布检查 / Source release checks
 
-所有者已授权清理后重新创建公开 Xav13RRR/LINGXU-V2，将已验证的干净快照提交并推送。
-代码、相关测试及 Banner 使用 Apache-2.0，署名 Copyright 2026 Xav13RRR。
-见 [授权记录](RIGHTS_CLEARANCE.md)、[NOTICE](../NOTICE) 及 ADR-0173。
+## 中文
 
-The owner authorized clean recreation, commit and push of this Apache-2.0 source repository.
-This is source publication, not production deployment. The existing archive remains private.
+发布前检查以下内容：
 
-## 数据与历史 / Data and history
+1. 核对 `.publication-files.txt`，只包含源码、合成测试、文档和许可素材。
+2. 运行[安全检查](../SECURITY.md)，检查工作区、暂存内容和待发布的 Git 历史。
+   不得包含密钥、会议数据、运行记录或私有样本的哈希与统计。
+3. 核对 [LICENSE](../LICENSE)、[NOTICE](../NOTICE)、代码及素材来源和第三方许可证。
+4. 运行静态检查、自动测试和构建，检查源码包与 wheel 的文件清单和内容。
+5. 核对远端提交、文件清单及 CI 结果。测试覆盖范围和人工验收限制见[测试说明](TEST_REPORT.md)。
 
-按逐文件白名单和哈希复制候选，在独立目录初始化全新 Git 仓库。不带入旧 `.git`、分支、
-标签、旧提交、密钥、真实会议记录、数据库、录音、逐字稿、纪要、缓存或模型权重。
-原私有档案的引用及可见性不变；本机运行中的服务不变。
+`scripts/prepare_publication.py` 用于在本地 `private/` 下生成白名单源码快照和校验清单，
+不执行提交、推送或部署。它要求输入的 `PUBLICATION_STATUS.json` 中
+`publication_authorized=false`；已发布仓库的状态不适合作为新候选的准备输入。
+检查导出结果后，再按发布流程提交。
 
-Only allowlisted, hash-verified source files enter the new root commit. Old Git objects, private
-working directories, credentials and real meeting/runtime data are excluded. The original archive's
-refs and visibility, and existing runtime services, remain unchanged.
+## English
 
-## 跳过的检查 / Skipped checks
+Before releasing source:
 
-Windows 清理后完整测试为 1,491 项通过、两项符号链接能力相关跳过：术语表链接的路径逃逸拒绝，
-以及密钥扫描器在读取前拒绝指向仓库外的父目录链接。跳过不等于禁用防护，但该 Windows
-环境没有实际验证这两种链接行为。Linux CI 单独执行它们并运行全套测试，须观察实际结果。
-Task 16 人工语音矩阵不因发布或 CI 自动成为通过。
+1. Review `.publication-files.txt`: include only source, synthetic tests, documentation and licensed assets.
+2. Run the [security checks](../SECURITY.md) against the working tree, index and history to be published.
+   Exclude credentials, meeting data, execution records and private sample hashes or statistics.
+3. Check [LICENSE](../LICENSE), [NOTICE](../NOTICE), code/asset provenance and third-party licences.
+4. Run static checks, automated tests and builds; inspect source-distribution and wheel contents.
+5. Verify the remote commit, file inventory and CI results. See [test coverage](TEST_REPORT.md)
+   for platform limitations and manual acceptance requirements.
 
-The clean Windows suite passed 1,491 tests with two real-filesystem symlink cases skipped because link
-creation was unavailable. They cover glossary path escape and secret-scan ancestor-link rejection,
-not meeting functionality. Companion deterministic tests pass. Linux CI explicitly executes both;
-Linux success does not retrospectively prove Windows-specific link/permission behavior.
-
-## 后续维护 / Future maintenance
-
-PUBLICATION_STATUS.json 只记录本次初始发布授权，不授权生产部署或后续自动发布。
-prepare_publication.py 保留为未发布候选工具：它不是推送器，会拒绝以已经授权发布的状态
-作为新的准备输入。未来候选应有自己的准备状态和审核，不复用本次授权。
-
-The retained candidate-preparation tool intentionally rejects an already-authorized release status
-as input. Future candidates need their own review state; initial publication authority is not
-automatic permission for future releases. Third-party licences and any future binary/image
-redistribution obligations remain separate from this source-only publication.
+`scripts/prepare_publication.py` creates an allowlisted source snapshot and integrity inventory under
+local `private/`; it does not commit, push or deploy. Its input `PUBLICATION_STATUS.json` must have
+`publication_authorized=false`. A released repository's status is not preparation input for a new
+candidate. Review the exported files before submitting them for release.

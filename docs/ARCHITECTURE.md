@@ -1,7 +1,6 @@
 # Lingxu Architecture
 
-This document describes the current production architecture. Historical phase headings below
-identify when a boundary was introduced; they do not limit the currently deployed feature set.
+Lingxu separates voice capture, deterministic meeting control and post-meeting processing.
 
 ```text
 Independent Lingxu Discord Application
@@ -23,10 +22,10 @@ The Discord receive callback is deliberately narrow: authoritative user mapping,
 monotonic timestamp, and non-blocking handoff to the formal recording, ASR, and ephemeral-assistant
 boundaries. Encryption, disk I/O, model/network calls, logging, and state transitions are outside it.
 
-## Phase 2 persistence boundary
+## Persistence boundary
 
 ```text
-Bot-side service / future Meeting Runtime
+Bot-side service / Meeting Runtime
         |
         +--> MeetingSessionRepository --> SQLite WAL --> append-only events
         |                                  |              + snapshots
@@ -45,7 +44,7 @@ One-shot lingxu-migrate --> exclusive Alembic DDL ownership
                                                     + atomic lease/checkpoint/completion
 ```
 
-The Phase 2 database is owned only by Lingxu. SQLAlchemy 2 repositories use short transactions,
+The database is owned only by Lingxu. SQLAlchemy 2 repositories use short transactions,
 SQLite foreign keys, WAL mode, a five-second busy timeout, and database constraints for one active
 Session per guild, event sequence uniqueness, and job idempotency.
 
@@ -61,7 +60,7 @@ The independently deployed Worker owns the complete post-meeting pipeline descri
 never runs schema DDL: startup requires the exact configured Alembic head before recovery or job
 leasing begins.
 
-## Phase 3 recording path
+## Recording path
 
 ```text
 Discord user PCM
@@ -79,7 +78,7 @@ Queue controls and frames share one ordered structure; overflow removes only the
 never a withdrawal/finalisation control. No FFmpeg, codec, encryption, file, database, or network
 operation runs in the Discord receive callback.
 
-## Phase 4 realtime sentence ASR path
+## Realtime sentence ASR path
 
 ```text
 Discord user PCM
@@ -106,7 +105,7 @@ SenseVoice receives normalised mono `float32` at 16 kHz, uses automatic language
 wrapped by the replaceable `RealtimeASRProvider` protocol. Model loading is lazy and validates the
 approved SenseVoice and FSMN-VAD weight hashes.
 
-## Phase 5 TTS and playback path
+## TTS and playback path
 
 ```text
 Meeting prompt
@@ -130,7 +129,7 @@ service boundaries.
 configured 200–500 ms debounce after completion. Rule intent processing can reject similar ASR
 text during that window, preventing the Bot's own playback from causing a high-risk action.
 
-## Phase 6 deterministic Meeting Runtime
+## Deterministic Meeting Runtime
 
 Commands from Discord, rules, or system tasks enter `MeetingRuntime`. The Runtime validates the
 fixed edge and host guard, updates the materialised Session, and appends the state event in one
@@ -141,7 +140,7 @@ or rewrite state.
 recovery but are never authoritative over the append-only event stream. See
 `docs/MEETING_STATE_MACHINE.md`.
 
-## Phase 7–11 application layers
+## Application layers
 
 - Discord `/meeting` commands and persistent Views call `MeetingController`; only
   `MeetingRuntime` chooses Meeting state targets.
@@ -191,7 +190,7 @@ recovery but are never authoritative over the append-only event stream. See
   overtime, and optional follow-up participation remain closed event facts. The current
   final-publication path sends every non-empty consented source row in compact human/system
   partitions, a fixed speaker dictionary, and compact agenda/aggregate-vote context to the
-  owner-approved official DeepSeek API. ADR-0165 requests typed JSON claims and integer evidence
+  official DeepSeek API. ADR-0165 requests typed JSON claims and integer evidence
   arrays, not model-written Markdown tables. Local code validates the schema/references and
   composes the fixed layout and full authority tables, retaining untouched transcript rows.
   The composed Markdown is rejected unless its fixed
@@ -201,7 +200,7 @@ recovery but are never authoritative over the append-only event stream. See
 - Scenario roles fail closed. Anonymous votes store scoped pseudonyms/token hashes rather than
   Discord IDs. Role-private content uses the Session AES-GCM envelope.
 
-## Phase 12 local structured-intent boundary
+## Local structured-intent boundary
 
 ```text
 untrusted text
@@ -221,7 +220,7 @@ confidence, optional utterance ID, and decision; it does not duplicate utterance
 separate GPU service with no published port. The Bot verifies the pinned model manifest digest
 before each provider call.
 
-## Phase 13 local Host console
+## Local Host console
 
 The console runs inside the Bot process so every write reaches the same deterministic
 `MeetingController` and manual TTS can use the existing Discord voice client. Compose publishes
@@ -239,7 +238,7 @@ only `127.0.0.1:8765`.
 - Final utterances are projected only while the participant's realtime-ASR consent remains true.
 - Simulator state is process-local and cannot mutate the live Runtime.
 
-## M1+P2 Markdown agenda-import boundary
+## Markdown agenda-import boundary
 
 ```text
 host direct mention + one .md attachment in setup channel
@@ -252,7 +251,7 @@ host direct mention + one .md attachment in setup channel
        decoded, line-identified, bounded overlapping source blocks
        -> private-network pinned qwen3.5:9b + closed native JSON Schema
   -> source/provenance/confidence/language/vote/capacity validation
-  -> deterministic P2 defaults (agenda 15 min; vote 60 sec)
+  -> deterministic defaults (agenda 15 min; vote 60 sec)
   -> one transaction: all agenda rows + append-only AGENDA_IMPORT_COMMITTED event
   -> READY + content-safe “准备完毕” summary
 ```

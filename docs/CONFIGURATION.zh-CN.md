@@ -2,8 +2,8 @@
 
 [English](CONFIGURATION.en.md) · [部署指南](DEPLOYMENT.zh-CN.md) · [Discord 配置](DISCORD_SETUP.md)
 
-本文适用于自己的独立部署，不需要也不应取得维护者的密钥或会议数据。现有部署不需要为了
-文档更新而重新生成密钥、重新下载模型或重启。不要覆盖已有 `.env`。
+请为自己的部署配置独立凭据，不使用维护者的密钥或会议数据。不要覆盖已有 `.env`，
+也不要重新生成已有加密数据使用的密钥。
 
 ## 1. 首次配置清单
 
@@ -23,7 +23,7 @@
 
 DeepSeek 的变量名在本项目中是 **`SUMMARY_LLM_API_KEY`**，不是官方示例中的
 `DEEPSEEK_API_KEY`。保持 `.env.example` 中的 `SUMMARY_LLM_BASE_URL=https://api.deepseek.com`、
-`SUMMARY_LLM_MODEL=deepseek-flash`、模型指纹及其它参数不变。本指南不授权切换模型或服务商。
+`SUMMARY_LLM_MODEL=deepseek-flash`、模型指纹及其它默认参数；应用会校验此模型配置。
 
 ## 2. 获取自己的 DeepSeek API Key
 

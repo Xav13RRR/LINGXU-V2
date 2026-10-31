@@ -19,9 +19,7 @@
 私有会议统计。公开模型／依赖／授权素材与代码 schema 的完整性指纹不属于真实会议证据。
 
 `.gitignore` 只防止通常的误添加；它不会移除已跟踪文件、旧提交、其它克隆或远端缓存。
-当前文档清理不等于 Git 历史清理。已选 Apache-2.0 和新建无旧历史仓库方案；旧仓库保持私有。
-迁移代码／测试授权、Banner 及 `Xav13RRR/LINGXU-V2` 名称已由所有者确认；
-ADR-0172 已授权本次初始建库／提交／推送／公开，不授权任何生产部署。
+审查公开内容时，也必须检查待推送的历史提交。
 
 ### 提交前检查
 
@@ -56,7 +54,7 @@ git config --local core.hooksPath .githooks
 
 若发现漏洞／疑似泄露，先用已有的维护者私密渠道联系；如尚无私密渠道，只请求提供联系渠道，
 不要公开漏洞详情或敏感附件。启用 GitHub Private Vulnerability Reporting 后可使用仓库
-Security → Report a vulnerability；当前文档不声称该远端设置已经启用。
+Security → Report a vulnerability。
 不要将真实密钥交给维护者复现。暴露的访问凭据应在供应商平台撤销／轮换；历史清理不能代替
 撤销。数据加密密钥需单独迁移，避免丢失已有数据。
 
@@ -83,10 +81,7 @@ flags private meeting statistics in documents. Public dependency/model/approved-
 integrity pins are distinct from retained meeting evidence. Manual provenance review remains required.
 
 `.gitignore` is an accident barrier, not removal of tracked files, commits, other clones or remote
-caches. Current-document cleanup does not clean history. Apache-2.0 and a new history-free repository
-are selected; the original stays private. Migrated code/tests, the banner and the planned
-`Xav13RRR/LINGXU-V2` identity are owner-confirmed. ADR-0172 separately authorizes this initial
-repository creation/commit/push/publication, never production deployment.
+caches. Review all history to be pushed as well as the current files.
 
 ### Before committing
 
@@ -123,7 +118,6 @@ encryption root for existing data during an API-key update.
 
 Report suspected vulnerabilities/leaks through an established private maintainer channel. If none
 exists, request a private channel without posting exploit details or sensitive attachments. Once
-GitHub Private Vulnerability Reporting is enabled, use Security → Report a vulnerability; this
-document does not claim that remote setting is enabled. Never send actual credentials to reproduce
+GitHub Private Vulnerability Reporting is enabled, use Security → Report a vulnerability. Never send actual credentials to reproduce
 an issue. Revoke/rotate exposed access credentials at their provider: history cleanup is not a
 substitute. The data-encryption root requires a separate migration to preserve existing data.

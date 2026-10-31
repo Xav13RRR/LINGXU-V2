@@ -1,8 +1,8 @@
 # 聆序 LINGXU 本地部署指南
 
-本文档对应仓库内当前验证的本机版本：Windows、Docker Desktop、Discord 普通语音频道、
+本文介绍 Windows、Docker Desktop、Discord 普通语音频道、
 本地 Ollama `qwen3.5:9b`、本地 SenseVoice ASR、本地 CosyVoice 中文女声、独立会后
-Worker，以及项目所有者批准的官方 DeepSeek 最终纪要 API。持久数据库、音频和模型卷留在
+Worker，以及官方 DeepSeek 最终纪要 API 的部署方式。持久数据库、音频和模型卷留在
 本机；已授权的完整逐字稿、固定模板、权威议程和聚合投票事实会由 Worker 发往 DeepSeek。
 默认不会把 Ollama 或 TTS 端口发布到宿主机。
 
@@ -26,7 +26,7 @@ Python 包或数据库表，否则会破坏升级与恢复兼容性。
 
 ## 2. 前置条件
 
-### Windows GPU 方案（当前本机验证方案）
+### Windows GPU 方案
 
 - 64 位 Windows 10/11；
 - Docker Desktop，启用 WSL 2 后端和 Docker Compose v2；
@@ -104,7 +104,7 @@ FILE_ENCRYPTION_KEY=<URL-safe base64 32-byte key>
 不会披露占用方。会议创建、状态查看等轻量确定性配置可以先完成，开始重型流程时才占槽。
 
 不要修改仓库内已固定的模型名、revision 或 digest，除非完成新的模型审查和全量回归。
-生产本机 GPU 方案可以在 `.env` 设置：
+Windows GPU 方案可以在 `.env` 设置：
 
 ```dotenv
 COMPOSE_FILE=docker-compose.yml;docker-compose.gpu.yml
@@ -186,7 +186,7 @@ docker compose --profile model-download run --rm lingxu-asr-downloader
 [MODELS.md](MODELS.md)重新核对来源。Bot 与 Worker 运行时只从上述已验证本地快照加载，
 不会在会议启动或会后处理中查询 ModelScope。
 
-## 6. 启动当前本机 GPU 版本
+## 6. 启动 Windows GPU 部署
 
 首次模型和 `.env` 配置完成后，以掩码方式输入一次 DeepSeek API 密钥。脚本只在仓库外
 保存 Windows 当前用户可解密的 DPAPI 密文，不把密钥写入 `.env`：
@@ -330,7 +330,7 @@ powershell -ExecutionPolicy Bypass -File scripts/start_lingxu.ps1 -Cpu
 ```
 
 Qwen 模型、ASR 与 TTS 的功能边界不变，但实时短回答和动态 TTS 延迟可能显著增加。CPU
-模式主要用于兼容和恢复，不是当前本机的低延迟推荐方案。
+模式主要用于兼容和恢复，对低延迟有要求时建议使用 GPU 方案。
 
 ## 11. 固定模型来源
 
@@ -370,5 +370,5 @@ docker compose -f docker-compose.yml -f docker-compose.gpu.yml config --quiet
 `LINGXU_BUILD_REVISION`、`LINGXU_BUILD_SOURCE` 提供同一元数据；未提供 revision 时明确为
 `unknown`，不能把它当作可追溯发布。
 
-项目所有者已依据多轮真实正式会议，验收双向 DAVE、Phase 1 E2E 和 outcome extraction
-Gate。已退役的独立探针和私有 annotation preparation 不再是部署验收指令。
+CI 结果和待完成的人工语音验收见[测试说明](TEST_REPORT.md)。
+每个新部署都需要验证 Discord 连接、语音处理和最终纪要发送。

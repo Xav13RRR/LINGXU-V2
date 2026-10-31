@@ -1,7 +1,9 @@
-# Approved Models
+# Models and integrity checks
 
-These models implement Phase 4 realtime ASR. They are not LLMs and do not select or imply the
-later Phase 12 LLM provider/model decision.
+The tables below specify the ASR, wake-word, language and TTS models used by Lingxu.
+Runtime validates the listed model identities before inference.
+
+## Realtime ASR
 
 | Role | Model | Hub revision | Implementation-time repository HEAD | Weight SHA-256 | Licence |
 | --- | --- | --- | --- | --- | --- |
@@ -48,12 +50,12 @@ SenseVoice provider in memory; it is never persisted by the assistant path.
 | Allowlisted meeting-intent candidate | `qwen3.5:9b` | GGUF through Ollama `0.21.2` | 9.7B / Q4_K_M | `6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7` | Apache-2.0 |
 | Meeting realtime short answer | `qwen3.5:9b` | GGUF through Ollama `0.21.2` native structured output | 9.7B / Q4_K_M, 64-token maximum | `6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7` | Apache-2.0 |
 | Resident voice-channel short answer | `qwen3.5:9b` | GGUF through Ollama `0.21.2` native structured output | 9.7B / Q4_K_M, 64-token maximum | `6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7` | Apache-2.0 |
-| M1+P2 Markdown agenda import | `qwen3.5:9b` | GGUF through Ollama `0.21.2` native structured output | 9.7B / Q4_K_M, 1,536-token maximum per bounded chunk | `6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7` | Apache-2.0 |
+| Markdown agenda import | `qwen3.5:9b` | GGUF through Ollama `0.21.2` native structured output | 9.7B / Q4_K_M, 1,536-token maximum per bounded chunk | `6488c96fa5faab64bb65cbd30d4289e20e6130ef535a93ef9a49f42eda893ea7` | Apache-2.0 |
 
 The local manifest is 6,594,474,711 bytes. Production sets one loaded model, one parallel request,
 4,096-token context, flash attention, cloud disabled, and no published API port. The Bot verifies
-the full manifest digest before every provider request. A model update requires explicit owner
-approval, licence review, new digest, schema/injection regression, real local inference smoke, and
+the full manifest digest before every provider request. A model update requires model and licence review, a new digest, schema/injection regression,
+local inference smoke tests, and
 deployment health validation.
 
 For structured intent, the model receives only one untrusted utterance, public Meeting state, and
@@ -61,10 +63,10 @@ the request-specific actor-authorized intent enum. The local model has no post-m
 topic, outcome, or final-minutes role. It has no tools and is not used for vote tallying, state
 selection, database writes, TTS, or raw transcript replacement.
 
-For M1+P2 Markdown import, the Bot sends only bounded, line-identified blocks from the host's
+For Markdown import, the Bot sends only bounded, line-identified blocks from the host's
 attachment. The closed schema requires source-block references and per-field provenance. Lingxu
 rejects unknown references, low confidence, conflicting structure, unsupported multi-option votes,
-invalid languages, excess items, and incomplete vote definitions. Deterministic P2 defaults replace
+invalid languages, excess items, and incomplete vote definitions. Deterministic defaults replace
 model-supplied defaults: 15 minutes per agenda and 60 seconds per vote. The model proposes a complete
 candidate list but cannot write agenda rows; the repository performs one guarded atomic commit.
 
@@ -93,10 +95,9 @@ is the repository-approved policy identity used by configuration and provider va
 a downloadable local weight hash. The API key is loaded by the Windows launcher from current-user
 DPAPI storage into the child process environment and is never committed or logged.
 
-As of 2026-09-12, `deepseek-flash` is the official API ID for DeepSeek V4.1 Flash (ADR-0167).
-The policy digest identifies this approved contract, not immutable remote weights; the provider
-controls the alias. Existing prompts, endpoint, thinking/token/timeout limits and retry counts are
-unchanged. Historical records retain their original model labels. If a local environment overrides
+`deepseek-flash` is the configured API model ID (ADR-0167). The policy digest identifies the
+request contract, not immutable remote weights; the provider controls the alias.
+If a local environment overrides
 `SUMMARY_LLM_MODEL` or `SUMMARY_LLM_MODEL_DIGEST`, update both to the values above before startup.
 See the [official model mapping](https://api-docs.deepseek.com/quick_start/pricing/).
 
@@ -117,8 +118,8 @@ The aggregate digest covers the exact name, byte size, and SHA-256 of `campplus.
 `cosyvoice.yaml`, `flow.pt`, `hift.pt`, `llm.pt`, `speech_tokenizer_v1.onnx`, and `spk2info.pt`.
 The downloader accepts only the pinned repository and immutable revision; the serving container
 verifies every file before model load. Lingxu exposes only the built-in `中文女` SFT speaker.
-Changing the model, snapshot, upstream code, approved files, or voice requires explicit owner
-approval, licence review, new digests, intelligibility replay, and deployment health validation.
+Changing the model, snapshot, upstream code, approved files or voice requires model and licence
+review, new digests, intelligibility replay and deployment health validation.
 
 CosyVoice's approved offline text frontend is the `pengzhendong/wetext` Chinese/English
 normalisation inventory labelled `master` with aggregate digest

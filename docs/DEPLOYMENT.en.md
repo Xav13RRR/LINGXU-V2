@@ -1,8 +1,8 @@
 # 聆序 LINGXU Local Deployment Guide
 
-This guide documents the currently verified workstation build: Windows, Docker Desktop, an
+This guide covers deployment with Windows, Docker Desktop, an
 ordinary Discord voice channel, local Ollama `qwen3.5:9b`, local SenseVoice ASR, local CosyVoice
-Mandarin female TTS, an independent post-meeting Worker, and the owner-approved official DeepSeek
+Mandarin female TTS, an independent post-meeting Worker, and the official DeepSeek
 final-minutes API. Persistent database, audio, and model volumes remain on the operator's machine;
 the Worker sends the consent-filtered complete transcript, fixed template, authoritative agendas,
 and aggregate vote facts to DeepSeek. Ollama and TTS do not publish host ports by default.
@@ -27,7 +27,7 @@ identifiers remain lowercase for upgrade and recovery compatibility. Do not rena
 
 ## 2. Prerequisites
 
-### Windows GPU profile (the currently verified workstation profile)
+### Windows GPU profile
 
 - 64-bit Windows 10 or 11;
 - Docker Desktop with the WSL 2 backend and Docker Compose v2;
@@ -201,7 +201,7 @@ volume content and recheck the approved source in [MODELS.md](MODELS.md). Bot an
 load only these verified local snapshots and never query ModelScope during Meeting startup or
 post-processing.
 
-## 6. Start the current workstation GPU build
+## 6. Start the Windows GPU deployment
 
 After `.env` and all first-install models are ready, enter the DeepSeek API key once through the
 masked prompt. The script stores only a Windows current-user DPAPI ciphertext outside the repository;
@@ -273,7 +273,7 @@ Healthy production means:
   current Alembic revision and do not race through DDL;
 - `lingxu-bot`, `lingxu-worker`, `lingxu-ollama`, and `lingxu-tts` are all `healthy`;
 - Bot logs contain `application_commands_synced`; verify `/meeting`, `/assistant`, and `/wakeup`
-  in Discord with the default resident profile rather than relying on an obsolete count of two;
+  in Discord with the default resident profile;
 - Bot logs contain `bot_ready`;
 - Doctor passes Discord, encryption, ASR, KWS, Ollama, TTS, and inbound DAVE checks;
 - `http://127.0.0.1:8765/healthz` is reachable locally only when the host console is enabled;
@@ -351,7 +351,7 @@ powershell -ExecutionPolicy Bypass -File scripts/start_lingxu.ps1 -Cpu
 
 The Qwen, ASR, and TTS functional boundaries remain unchanged, but live short-answer and dynamic TTS
 latency can rise substantially. CPU mode is intended for compatibility and recovery, not the
-current workstation's low-latency profile.
+GPU profile's lower-latency use case.
 
 ## 11. Pinned model sources
 
@@ -392,6 +392,5 @@ uses builder/runtime stages; Git and uv exist only in the builder. Runtime image
 accepts the same metadata through `LINGXU_BUILD_VERSION`, `LINGXU_BUILD_REVISION`, and
 `LINGXU_BUILD_SOURCE`; an omitted revision is explicitly `unknown` and is not a traceable release.
 
-Repeated real formal Meetings and direct project-owner review have accepted the duplex DAVE,
-Phase 1 E2E, and outcome-extraction Gates. The retired standalone probe and private annotation
-preparation are not deployment acceptance commands.
+See [test coverage](TEST_REPORT.md) for CI results and outstanding manual voice acceptance checks.
+Validate Discord connectivity, voice processing and final minutes delivery on each new deployment.

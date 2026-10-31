@@ -1,11 +1,9 @@
 # Lingxu public-source maintenance plan
 
-## Scope and authority
+## Scope
 
-Maintain the independent Lingxu Bot and Worker. This repository is a clean public source baseline,
-not an archive of real meetings, private fixtures or production execution evidence. The owner
-authorized deletion/recreation of Xav13RRR/LINGXU-V2 after a complete privacy review (ADR-0173).
-The original LINGXU and Lingji repositories remain private; existing services must not change.
+Maintain the independent Lingxu Bot and Worker, with reproducible configuration, synthetic tests,
+clear documentation and strict separation of public source from private deployment data.
 
 ## Invariants
 
@@ -19,7 +17,7 @@ The original LINGXU and Lingji repositories remain private; existing services mu
   privacy failures and ambiguous publication still fail closed.
 - Checkpoints, atomic files and publication receipts prevent unsafe automatic regeneration/sends.
 - Pin dependencies, external Git references, model identities and manifests. Existing selections
-  remain as recorded in code and MODELS.md; no provider/model change or live call is authorized here.
+  remain as recorded in code and MODELS.md; changes require review and regression testing.
 - Preserve Guild isolation, scoped wake phrases and the single heavy-workload capacity boundary.
 - Do not add TRPG/mystery-game features or import/call Lingji at runtime.
 
@@ -35,17 +33,14 @@ Keep operational evidence outside the public repository. Do not encode private f
 tests, deny lists or examples. Source-file inventories and synthetic test results may be recorded.
 Never mark an unrun test as passed.
 
-## Current validation and sequencing
+## Validation priorities
 
-Inherited engineering Gates remain in STATE.md. The strict ordinary-voice Task 16 matrix remains
-PARTIALLY_RUN_NOT_PASSED: host/member roles, leave/rejoin, mute reapplication, permission loss,
-restart recovery and final owned-mute cleanup still require their explicit manual acceptance.
-The owner's source-publication exception does not convert that Gate and does not authorize deployment.
+Complete the outstanding ordinary-voice matrix: host/member roles, leave/rejoin, mute reapplication,
+permission loss, restart recovery and final cleanup of Bot-owned mutes. Its status remains
+PARTIALLY_RUN_NOT_PASSED until those cases have been observed and accepted.
 
-For this publication: review every allowlisted file; inspect test data provenance and historical
-documents; privately cross-check retained evidence fingerprints/content without printing them;
-run static checks, tests and package checks; create a fresh Git root with no old objects; verify
-the exact staged and remote trees; confirm the original repository remains private.
+Maintain static checks, platform tests, package integrity and the public-source privacy boundary.
+Use [TEST_REPORT.md](docs/TEST_REPORT.md) for coverage and [SECURITY.md](SECURITY.md) for release checks.
 
 ## References
 

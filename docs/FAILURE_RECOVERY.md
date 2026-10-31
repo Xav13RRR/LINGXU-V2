@@ -9,7 +9,7 @@
 - A crash may leave `.part` files. Startup removes only contained incomplete files, and they are
   never registered or reported as completed artifacts.
 
-## Phase 2 startup recovery
+## Startup recovery
 
 - Every important Session write uses a sibling `.part`, flush, `fsync`, SHA-256 calculation, and
   atomic replacement. Startup removes orphan `.part` files only within the configured Session root.
@@ -25,9 +25,9 @@
   and Worker can coordinate through the same independent database.
 
 Recovery never guesses meeting content from files. The database state and append-only event
-sequence are authoritative; later Meeting Runtime replay remains gated to Phase 6.
+sequence are authoritative. Meeting Runtime replays that sequence during recovery.
 
-## Phase 3 recorder recovery
+## Recorder recovery
 
 - Closed encrypted Segment names are scanned on recorder start; numbering resumes at the next value
   and never overwrites a prior Segment.
@@ -38,7 +38,7 @@ sequence are authoritative; later Meeting Runtime replay remains gated to Phase 
 - Withdrawal controls are ordered after already accepted frames; the acknowledgement is not
   returned until the user's current Segment is encrypted or the recorder has failed.
 
-## Phase 4 realtime ASR isolation
+## Realtime ASR isolation
 
 - Frame and utterance queues are bounded. Overflow is counted per user and never blocks AudioSink.
 - Provider calls have a hard async timeout. Timeout, inference error, empty output, or persistence
@@ -52,7 +52,7 @@ sequence are authoritative; later Meeting Runtime replay remains gated to Phase 
 - A missing model cache is a Doctor warning before first use; partial/wrong-sized cache is a Doctor
   failure, and a weight hash mismatch fails model initialisation.
 
-## Phase 5 playback isolation
+## Playback isolation
 
 - The CosyVoice service verifies every approved model file before readiness. The Bot checks the
   service's model digest and PCM WAV structure before caching. Any mismatch uses text fallback.
@@ -69,7 +69,7 @@ sequence are authoritative; later Meeting Runtime replay remains gated to Phase 
 - Fixed prompts are pre-generated into the persistent cache at deployment. Cache loss causes
   deterministic local regeneration and does not affect Meeting state recovery.
 
-## Phase 6 Meeting Runtime recovery
+## Meeting Runtime recovery
 
 - Runtime restart replays every immutable event and cross-checks the latest snapshot and
   materialised Session state.
@@ -79,7 +79,7 @@ sequence are authoritative; later Meeting Runtime replay remains gated to Phase 
   events or side effects.
 - `back` appends a reverse transition, preserving all earlier evidence.
 
-## Phase 7–11 recovery
+## Meeting services and scenario recovery
 
 - Final-minutes model/transport/validation failures produce labelled basic minutes without another
   inference (ADR-0164). These include saved meeting facts, attributed excerpts and all consented
@@ -107,7 +107,7 @@ sequence are authoritative; later Meeting Runtime replay remains gated to Phase 
   that were already accepted wait asynchronously for a recovered slot instead of running beside a
   different Guild's workload.
 
-## Phase 12 model and confirmation recovery
+## Model and confirmation recovery
 
 - Exact rules run before model inference and remain available when Ollama is stopped or unhealthy.
 - Provider timeout, HTTP failure, oversized/invalid JSON, schema violation, unknown intent,
@@ -118,7 +118,7 @@ sequence are authoritative; later Meeting Runtime replay remains gated to Phase 
   second action. Runtime and component guards remain the final authority if Meeting state changed
   while confirmation was pending.
 
-## Phase 13–14 console and deployment recovery
+## Console and deployment recovery
 
 - Browser refresh reuses an unexpired HttpOnly session and rebuilds the full view from persistent
   Meeting state; WebSocket reconnect never becomes a second state authority.

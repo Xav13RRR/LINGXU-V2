@@ -1,7 +1,6 @@
 # Transcript and minutes privacy design
 
-This file now documents the current design without private review examples, actual execution
-measurements or historical fixture references. It is not a retained meeting report.
+Transcript processing and minutes generation enforce consent, source integrity and controlled publication.
 
 ## Deterministic boundaries
 

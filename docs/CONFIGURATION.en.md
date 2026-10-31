@@ -3,8 +3,7 @@
 [中文](CONFIGURATION.zh-CN.md) · [Deployment](DEPLOYMENT.en.md) · [Discord setup](DISCORD_SETUP.md)
 
 Use your own independent deployment, credentials and data. You do not need the maintainer's keys
-or meetings. Existing installations need no key regeneration, model download or restart for a
-documentation update. Never overwrite an existing `.env`.
+or meetings. Never overwrite an existing `.env` or regenerate the key used by existing encrypted data.
 
 ## 1. First-install checklist
 
@@ -24,7 +23,7 @@ a local editor, not in terminal commands, chat, issues, screenshots, recordings 
 
 This application uses **`SUMMARY_LLM_API_KEY`**, not the `DEEPSEEK_API_KEY` name in upstream examples.
 Keep `SUMMARY_LLM_BASE_URL=https://api.deepseek.com`, `SUMMARY_LLM_MODEL=deepseek-flash`, the model
-digest and other defaults from `.env.example`. This guide does not authorize provider/model changes.
+digest and other defaults from `.env.example`; the application validates this model configuration.
 
 ## 2. Obtain your own DeepSeek API key
 

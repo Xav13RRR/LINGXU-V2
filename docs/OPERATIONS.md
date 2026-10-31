@@ -60,7 +60,7 @@ artifact hashes, manifest structure, and tar/gzip safety. It never decrypts audi
 content, identities, paths, or identifiers. Its optional legacy probe-root support exists only for
 old retained data and is not a current test instruction.
 
-## Phase 2 Worker
+## Worker
 
 ```text
 uv run python -m lingxu.worker_main
@@ -86,7 +86,7 @@ database without rebuilding the image, rerun it explicitly with
 Logs contain only job IDs, job types, counts, stages, and error classes; they must never include
 keys, audio, transcripts, or meeting content.
 
-## Phase 3 recording storage
+## Recording storage
 
 Formal recording requires a valid `FILE_ENCRYPTION_KEY` and writable `RUNTIME_TMP`. In Compose,
 `/runtime` is a private tmpfs and encrypted output is under `/data/sessions`.
@@ -101,7 +101,7 @@ recording_tmp_writable
 Never redirect `RUNTIME_TMP` into the persistent Session root. Backup only `.flac.enc` and metadata;
 plaintext `.flac` or `.flac.part` under persistent storage is an incident.
 
-## Phase 4 realtime ASR
+## Realtime ASR
 
 Model cache is independent Lingxu deployment data under `MODEL_CACHE_DIR` (`/models` in Compose).
 Preload and validate the approved CPU models before a meeting:
@@ -124,7 +124,7 @@ Operational signals:
 - `utterances_dropped_queue_full`: model throughput is below offered sentence load;
 - `provider_timeouts` / `provider_failures`: isolated inference problems;
 - `provider_results_discarded_after_withdrawal`: expected privacy enforcement;
-- `latency_ms.p50/p95/max`: stop-to-final latency, with a Phase 4 target of P95 ≤ 4,000 ms.
+- `latency_ms.p50/p95/max`: stop-to-final latency, with a target of P95 ≤ 4,000 ms.
 
 ## Ephemeral Meeting voice assistant
 
@@ -211,7 +211,7 @@ classes, and aggregate assistant counters. There is no recording, transcript, Wo
 persistent TTS-cache output to inspect. Resident-mode checks do not alter the already accepted
 formal-Meeting Gates.
 
-## Phase 5 offline TTS
+## Offline TTS
 
 Production uses the pinned `FunAudioLLM/CosyVoice-300M-SFT` snapshot with its built-in `中文女`
 speaker. The private service has no host port. For the first local installation, download and
@@ -284,7 +284,7 @@ Formal voice startup and shutdown:
   clear, Discord disconnect, then post-meeting Job creation. Do not kill the Bot merely because
   finalisation takes several seconds.
 
-## Phase 12 local structured intent
+## Local structured intent
 
 The selected deployment uses the pinned Ollama image and `qwen3.5:9b` on the private Compose
 network. Port 11434 is intentionally not published.
@@ -367,7 +367,7 @@ log, rebuilds it and its deterministic dependants, and reuses a current full-tra
 artifact without sending a further DeepSeek request. A successful retry then proceeds to ordinary
 Discord publication, so use it only when publication is intended.
 
-## M1+P2 Markdown agenda import
+## Markdown agenda import
 
 After `/meeting create`, the host sends one direct Bot mention with exactly one `.md` attachment in
 the setup channel. Lingxu replies immediately with a content-free processing acknowledgement. It
@@ -390,7 +390,7 @@ AGENDA_IMPORT_DEFAULT_DURATION_MINUTES=15
 AGENDA_IMPORT_DEFAULT_VOTE_SECONDS=60
 ```
 
-Verify the exact selected model and P2 policy with a synthetic, content-safe smoke:
+Verify the pinned model and agenda-import policy with a synthetic, content-safe smoke:
 
 ```text
 docker compose run --rm --no-deps lingxu-bot python scripts/smoke_agenda_import.py
@@ -402,7 +402,7 @@ fixed user-facing retry message and no partial agenda. Do not inspect provider p
 An interrupted `PROCESSING` record is recovered once after Bot readiness; if its configured provider
 is unavailable it is failed safely so the Meeting does not remain permanently blocked.
 
-## Phase 13 Host console
+## Host console
 
 The console is part of the Bot process and is published only on `127.0.0.1:8765`. Start the approved
 GPU deployment, open `http://127.0.0.1:8765`, and reveal the login token only in the local terminal:
@@ -417,7 +417,7 @@ The token is exchanged for an HttpOnly browser session. Refresh restores it; wri
 and WebSocket state is limited to the configured Guild. `/healthz` and `/metrics` are content-free.
 Run `scripts/smoke_host_console.py` only when the configured Guild has no real active Meeting.
 
-## Phase 14 profiles, release, and rollback
+## Profiles, release, and rollback
 
 - CPU: `docker compose -f docker-compose.yml ...`
 - NVIDIA GPU: `docker compose -f docker-compose.yml -f docker-compose.gpu.yml ...`

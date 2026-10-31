@@ -80,7 +80,7 @@ This route accepts only the Meeting host, an empty pending agenda, a not-yet-sta
 bounded Markdown attachment. Mention matching uses the immutable Bot user ID, so changing the Bot's
 global name or Guild nickname does not matter. Plain typed `@name` text is not a mention.
 
-Local `qwen3.5:9b` applies the approved M1+P2 policy to infer source-backed titles, order, language,
+Local `qwen3.5:9b` applies the agenda-import policy to infer source-backed titles, order, language,
 explicit vote semantics, and duration. Missing discussion duration receives the fixed 15-minute
 default; an explicit vote without a duration receives the fixed 60-second default. The model has no
 Discord, database, or tool access. All source references, bounds, languages, votes, confidence, and
@@ -313,7 +313,7 @@ The Worker still registers local `minutes.json`, `transcript.txt`, canonical tra
 and `evidence.json` artifacts for consistency, recovery, and audit. They are not normal Discord
 attachments under the current contract.
 
-The owner-approved official DeepSeek API analyzes the complete consent-filtered transcript as
+The official DeepSeek API analyzes the complete consent-filtered transcript as
 compact human/system partitions with a speaker dictionary and agenda/aggregate-vote context.
 It returns structured claims and evidence IDs; the Worker validates them and composes `minutes.md`
 locally. Unedited source rows are preserved, and full authority tables never depend on the model

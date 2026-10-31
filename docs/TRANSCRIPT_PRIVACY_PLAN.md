@@ -1,7 +1,6 @@
 # Privacy hardening maintenance checklist
 
-This is a current maintenance checklist, not a historical execution record. Private fixtures,
-real meeting metadata and earlier preparation results are intentionally absent.
+Use this checklist when changing transcript processing or minutes generation.
 
 1. Read the current architecture, privacy contracts and Gate state.
 2. Express a defect with a self-contained synthetic regression. Never paste retained meetings,
@@ -10,8 +9,8 @@ real meeting metadata and earlier preparation results are intentionally absent.
 4. Check model schema/evidence boundaries and deterministic authority facts.
 5. Exercise failure/restart/currentness and publication idempotency without live services.
 6. Run static checks, applicable tests, package/privacy checks and source-file provenance review.
-7. Preserve manual/unrun Gate distinctions. Obtain separate owner approval before live calls,
-   production-data changes, deployment or publication.
+7. Report manual and unrun checks separately. Plan live tests and deployment with the operator,
+   including participant consent, data handling and rollback requirements.
 
 Deployment-specific diagnostics and real-data reviews belong in private operator storage, not this
 repository, CI logs, issues or release attachments. Public model/dependency identity pins remain
