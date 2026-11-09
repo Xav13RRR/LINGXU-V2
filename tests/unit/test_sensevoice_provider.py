@@ -7,6 +7,7 @@ from typing import Any
 import numpy as np
 import pytest
 
+from lingxu.asr.models import UtteranceAudio
 from lingxu.asr.provider import SenseVoiceProvider
 
 
@@ -39,6 +40,34 @@ def test_pcm_conversion_is_stereo_to_mono_and_48k_to_16k() -> None:
 def test_pcm_conversion_rejects_incomplete_stereo_frame() -> None:
     with pytest.raises(ValueError, match="complete stereo"):
         SenseVoiceProvider._mono_16k(b"\x01\x00")
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("samples", "expected_length"), [(320, 400), (400, 400), (480, 480)])
+async def test_transcribe_supplies_at_least_one_vad_frame(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, samples: int, expected_length: int
+) -> None:
+    provider = SenseVoiceProvider(model_cache_dir=tmp_path)
+
+    def generate(*, input: np.ndarray[Any, np.dtype[np.float32]], **_kwargs: Any) -> list[Any]:
+        assert input.dtype == np.float32
+        assert len(input) == expected_length
+        np.testing.assert_array_equal(input[:samples], 0.125)
+        np.testing.assert_array_equal(input[samples:], 0.0)
+        return []
+
+    monkeypatch.setattr(provider, "_load_model", lambda: SimpleNamespace(generate=generate))
+    await provider.transcribe(
+        UtteranceAudio(
+            session_id="synthetic-session",
+            user_id=1,
+            started_monotonic_ns=0,
+            ended_monotonic_ns=samples * 62_500,
+            pcm_s16le_48k_stereo=struct.pack("<hh", 4096, 4096) * (samples * 3),
+        ),
+        language="auto",
+        hotwords=(),
+    )
 
 
 def test_runtime_load_uses_verified_local_snapshots_without_remote_model_ids(

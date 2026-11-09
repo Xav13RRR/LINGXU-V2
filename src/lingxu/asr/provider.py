@@ -18,6 +18,8 @@ from lingxu.asr.models import ASRResult, UtteranceAudio
 _LANGUAGE_TAG = re.compile(r"<\|(?P<language>zh|en|yue|ja|ko|auto)\|>", re.IGNORECASE)
 _SENSEVOICE_MODEL_SHA256 = "833ca2dcfdf8ec91bd4f31cfac36d6124e0c459074d5e909aec9cabe6204a3ea"
 _FSMN_VAD_MODEL_SHA256 = "b3be75be477f0780277f3bae0fe489f48718f585f3a6e45d7dd1fbb1a4255fc5"
+# The pinned FSMN-VAD frontend needs a complete 25 ms window at 16 kHz.
+_FSMN_VAD_FRAME_SAMPLES = 400
 _MODEL_REPOSITORY_ALIASES = {
     "fsmn-vad": "iic/speech_fsmn_vad_zh-cn-16k-common-pytorch",
 }
@@ -224,6 +226,9 @@ class SenseVoiceProvider:
     ) -> ASRResult:
         started_ns = time.perf_counter_ns()
         samples = self._mono_16k(utterance.pcm_s16le_48k_stereo)
+        if samples.size < _FSMN_VAD_FRAME_SAMPLES:
+            # FunASR finalises an empty feature cache if the input yields no frames.
+            samples = np.pad(samples, (0, _FSMN_VAD_FRAME_SAMPLES - samples.size))
         hotword = " ".join(hotwords)
         with self._model_lock:
             model = self._load_model()
