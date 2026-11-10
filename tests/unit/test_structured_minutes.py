@@ -174,23 +174,53 @@ def test_consensus_requires_two_humans_even_when_only_one_has_source_rows() -> N
 
 
 @pytest.mark.parametrize(
-    "raw",
+    ("raw", "reason"),
     [
-        '{"version":1,"version":1}',
-        "not json",
-        '{"version":true}',
-        '{"version":1,"PRIVATE_FIELD_SECRET":"PRIVATE_VALUE_SECRET"}',
+        ('{"PRIVATE_FIELD_SECRET":1,"PRIVATE_FIELD_SECRET":2}', "json_duplicate_key"),
+        (
+            '{"topics":[{"PRIVATE_FIELD_SECRET":1,"PRIVATE_FIELD_SECRET":2,}],}',
+            "json_duplicate_key",
+        ),
+        ('{"version":1 "summary":[]}', "json_syntax_error"),
+        ('{"version":1,"summary":[,]}', "json_syntax_error"),
+        ('{"version":NaN}', "json_syntax_error"),
+        ('prefix {"version":1}', "json_syntax_error"),
+        ('{"version":true}', "schema_invalid"),
+        ('{"version":1,"PRIVATE_FIELD_SECRET":"PRIVATE_VALUE_SECRET"}', "schema_invalid"),
     ],
 )
-def test_invalid_json_and_schema_errors_are_content_free(raw: str) -> None:
+def test_invalid_json_and_schema_errors_are_content_free(raw: str, reason: str) -> None:
     with pytest.raises(FullTranscriptPreviewError) as raised:
         compose_structured_minutes(
             raw, prepared=_prepared(), authoritative_facts=prepare_authoritative_meeting_facts()
         )
     assert raised.value.validation_details is not None
+    assert raised.value.validation_details.reason == reason
+    if reason.startswith("json_"):
+        assert raised.value.validation_details.as_dict() == {
+            "reason": reason,
+            "section": "document",
+        }
     assert "PRIVATE" not in str(raised.value) + json.dumps(
         raised.value.validation_details.as_dict()
     )
+
+
+def test_json_formatting_recovery_preserves_string_content() -> None:
+    payload = _payload()
+    text = '合成发言中包含 "引号"、,] 和 ,}。'
+    payload["summary"][0]["text"] = text
+    document = json.dumps(payload, ensure_ascii=False)
+    # Insert a terminal comma after the real evidence array item and the outer object member.
+    document = document.replace('"evidence_ids": [1]', '"evidence_ids": [1,]', 1)
+    wrapped = f"\ufeff```JSON\n{document[:-1]},\n}}\n```"
+    facts = prepare_authoritative_meeting_facts()
+    prepared = _prepared()
+    actual = compose_structured_minutes(wrapped, prepared=prepared, authoritative_facts=facts)
+    expected = compose_structured_minutes(
+        json.dumps(payload), prepared=prepared, authoritative_facts=facts
+    )
+    assert actual == expected
 
 
 @pytest.mark.parametrize(

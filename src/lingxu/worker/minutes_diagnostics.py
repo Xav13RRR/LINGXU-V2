@@ -20,6 +20,8 @@ VALIDATION_SECTIONS = frozenset(
 VALIDATION_REASONS = frozenset(
     {
         "invalid_json",
+        "json_syntax_error",
+        "json_duplicate_key",
         "schema_invalid",
         "missing_reference",
         "unknown_reference",
